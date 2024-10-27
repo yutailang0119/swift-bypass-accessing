@@ -8,42 +8,27 @@ let package = Package(
   name: "swift-bypass-accessing",
   platforms: [.macOS(.v12), .iOS(.v15), .tvOS(.v15), .watchOS(.v8), .macCatalyst(.v15)],
   products: [
-    // Products define the executables and libraries a package produces, making them visible to other packages.
     .library(
-      name: "swift-bypass-accessing",
-      targets: ["swift-bypass-accessing"]
-    ),
-    .executable(
-      name: "swift-bypass-accessingClient",
-      targets: ["swift-bypass-accessingClient"]
+      name: "BypassAccessing",
+      targets: ["BypassAccessing"]
     ),
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
   ],
   targets: [
-    // Targets are the basic building blocks of a package, defining a module or a test suite.
-    // Targets can depend on other targets in this package and products from dependencies.
-    // Macro implementation that performs the source transformation of a macro.
     .macro(
-      name: "swift-bypass-accessingMacros",
+      name: "BypassAccessingMacros",
       dependencies: [
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
       ]
     ),
-
-    // Library that exposes a macro as part of its API, which is used in client programs.
-    .target(name: "swift-bypass-accessing", dependencies: ["swift-bypass-accessingMacros"]),
-
-    // A client of the library, which is able to use the macro in its own code.
-    .executableTarget(name: "swift-bypass-accessingClient", dependencies: ["swift-bypass-accessing"]),
-
-    // A test target used to develop the macro implementation.
+    .target(name: "BypassAccessing", dependencies: ["BypassAccessingMacros"]),
     .testTarget(
-      name: "swift-bypass-accessingTests",
+      name: "BypassAccessingTests",
       dependencies: [
-        "swift-bypass-accessingMacros",
+        "BypassAccessingMacros",
         .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
       ]
     ),
