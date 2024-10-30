@@ -11,7 +11,7 @@ let package = Package(
     .library(
       name: "BypassAccessing",
       targets: ["BypassAccessing"]
-    ),
+    )
   ],
   dependencies: [
     .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
