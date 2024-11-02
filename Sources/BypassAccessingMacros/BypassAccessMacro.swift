@@ -1,3 +1,4 @@
+import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 
@@ -14,7 +15,14 @@ public struct BypassAccessMacro: PeerMacro {
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       return []
     } else {
-      return []
+      let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
+      context.diagnose(
+        Diagnostic(
+          node: node,
+          message: error
+        )
+      )
+      throw error
     }
   }
 }
