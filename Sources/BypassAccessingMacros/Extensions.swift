@@ -81,3 +81,16 @@ extension FunctionEffectSpecifiersSyntax {
     throwsClause != nil
   }
 }
+
+extension TypeSpecifierListSyntax {
+  var isInout: Bool {
+    for specifier in self {
+      for token in specifier.tokens(viewMode: .all) {
+        if token.tokenKind == .keyword(.inout) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+}
