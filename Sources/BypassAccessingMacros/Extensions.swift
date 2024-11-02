@@ -71,3 +71,13 @@ extension VariableDeclSyntax {
     }
   }
 }
+
+extension FunctionEffectSpecifiersSyntax {
+  var isAsync: Bool {
+    asyncSpecifier != nil
+  }
+
+  var isThrows: Bool {
+    throwsClause != nil
+  }
+}
