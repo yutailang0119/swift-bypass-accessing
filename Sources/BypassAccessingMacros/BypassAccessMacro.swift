@@ -10,9 +10,9 @@ public struct BypassAccessMacro: PeerMacro {
   ) throws -> [SwiftSyntax.DeclSyntax] {
     if let variable = declaration.as(VariableDeclSyntax.self) {
       return []
-    } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      return []
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
+      return []
+    } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
       return []
     } else {
       let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
