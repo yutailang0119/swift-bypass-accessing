@@ -14,19 +14,19 @@ public struct BypassAccessMacro: PeerMacro {
       let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
       let mainActorAttribute: AttributeSyntax? =
         function.attributes.isMainActor ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
-      let tryToken: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
-      let awaitToken: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isAsync ? .keyword(.await) : nil }
+      let tryOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
+      let awaitOperator : TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isAsync ? .keyword(.await) : nil }
 
       let functionDecl = try FunctionDeclSyntax(
         """
         \(mainActorAttribute) \(staticModifier)
         func ___\(function.name)\(function.genericParameterClause)\(function.signature.trimmed) \(function.genericWhereClause){
-          \(tryToken) \(awaitToken) \(function.name)(
+          \(tryOperator) \(awaitOperator) \(function.name)(
             \(
                 raw: function.signature.parameterClause.parameters
                     .map {
-                      let inoutToken: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
-                      return "\($0.firstName.trimmed): \(inoutToken?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
+                      let inoutAmpersand: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
+                      return "\($0.firstName.trimmed): \(inoutAmpersand?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
                     }
                     .joined(separator: ",\n")
             )
