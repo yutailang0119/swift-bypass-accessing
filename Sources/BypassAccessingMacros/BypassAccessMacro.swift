@@ -42,7 +42,37 @@ public struct BypassAccessMacro: PeerMacro {
         """
       ]
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      return []
+      let mainActorAttribute: AttributeSyntax? =
+        initializer.attributes.isMainActor
+        ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
+      let tryToken: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
+      let awaitToken: TokenSyntax? = initializer.signature.effectSpecifiers
+        .flatMap { $0.isAsync ? .keyword(.await) : nil }
+
+      let functionDecl = try FunctionDeclSyntax(
+        """
+        \(mainActorAttribute) static
+        func ___\(initializer.initKeyword.trimmed)\(initializer.genericParameterClause)\(initializer.signature.trimmed) -> Self\(initializer.optionalMark) \(initializer.genericWhereClause){
+          \(tryToken) \(awaitToken) Self.init(
+            \(
+                raw: initializer.signature.parameterClause.parameters
+                    .map {
+                      let inoutToken: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
+                      return "\($0.firstName.trimmed): \(inoutToken?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
+                    }
+                    .joined(separator: ",\n")
+            )
+          )
+        }
+        """
+      )
+      return [
+        """
+        #if DEBUG
+        \(functionDecl.trimmed.formatted())
+        #endif
+        """
+      ]
     } else {
       let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
       context.diagnose(
