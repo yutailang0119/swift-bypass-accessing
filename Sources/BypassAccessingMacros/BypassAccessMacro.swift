@@ -30,7 +30,23 @@ public struct BypassAccessMacro: PeerMacro {
         throw error
       }
 
-      return []
+      switch variable.bindingSpecifier.tokenKind {
+      case .keyword(.let):
+        return []
+      case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
+        return []
+      case .keyword(.var):
+        return []
+      default:
+        let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
+        context.diagnose(
+          Diagnostic(
+            node: node,
+            message: error
+          )
+        )
+        throw error
+      }
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
       let mainActorAttribute: AttributeSyntax? =
