@@ -37,7 +37,14 @@ public struct BypassAccessMacro: PeerMacro {
       let variableDecl: VariableDeclSyntax
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
-        return []
+        variableDecl = try VariableDeclSyntax(
+          """
+          \(mainActorAttribute) \(staticModifier)
+          var ___\(raw: identifier.text): \(type.trimmed) {
+            \(raw: identifier.text)
+          }
+          """
+        )
       case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
         return []
       case .keyword(.var):
