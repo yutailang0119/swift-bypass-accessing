@@ -30,6 +30,11 @@ public struct BypassAccessMacro: PeerMacro {
         throw error
       }
 
+      let staticModifier: TokenSyntax? = variable.modifiers.isInstance ? nil : .keyword(.static)
+      let mainActorAttribute: AttributeSyntax? =
+        variable.attributes.isMainActor ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
+
+      let variableDecl: VariableDeclSyntax
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
         return []
@@ -47,6 +52,14 @@ public struct BypassAccessMacro: PeerMacro {
         )
         throw error
       }
+
+      return [
+        """
+        #if DEBUG
+        \(variableDecl.trimmed.formatted())
+        #endif
+        """
+      ]
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
       let mainActorAttribute: AttributeSyntax? =
