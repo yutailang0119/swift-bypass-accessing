@@ -63,7 +63,19 @@ public struct BypassAccessMacro: PeerMacro {
           """
         )
       case .keyword(.var):
-        return []
+        variableDecl = try VariableDeclSyntax(
+          """
+          \(mainActorAttribute) \(staticModifier)
+          var ___\(raw: identifier.text): \(type.trimmed) {
+            get {
+              \(raw: identifier.text)
+            }
+            set {
+              \(raw: identifier.text) = newValue
+            }
+          }
+          """
+        )
       default:
         let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
         context.diagnose(
