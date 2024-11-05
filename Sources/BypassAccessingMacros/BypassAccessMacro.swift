@@ -15,7 +15,9 @@ public struct BypassAccessMacro: PeerMacro {
       let mainActorAttribute: AttributeSyntax? =
         function.attributes.isMainActor ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
       let tryOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
-      let awaitOperator : TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isAsync ? .keyword(.await) : nil }
+      let awaitOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap {
+        $0.isAsync ? .keyword(.await) : nil
+      }
 
       let functionDecl = try FunctionDeclSyntax(
         """
@@ -45,7 +47,9 @@ public struct BypassAccessMacro: PeerMacro {
       let mainActorAttribute: AttributeSyntax? =
         initializer.attributes.isMainActor
         ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
-      let tryOperator: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
+      let tryOperator: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap {
+        $0.isThrows ? .keyword(.try) : nil
+      }
       let awaitOperator: TokenSyntax? = initializer.signature.effectSpecifiers
         .flatMap { $0.isAsync ? .keyword(.await) : nil }
 
