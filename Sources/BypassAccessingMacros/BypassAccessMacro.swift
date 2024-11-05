@@ -46,7 +46,22 @@ public struct BypassAccessMacro: PeerMacro {
           """
         )
       case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
-        return []
+        let accessorEffectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
+        let asyncSpecifier = accessorEffectSpecifiers?.asyncSpecifier
+        let throwsSpecifier = accessorEffectSpecifiers?.throwsClause?.throwsSpecifier
+        let tryOperator: TokenSyntax? = throwsSpecifier != nil ? .keyword(.try) : nil
+        let awaitOperator: TokenSyntax? = asyncSpecifier != nil ? .keyword(.await) : nil
+
+        variableDecl = try VariableDeclSyntax(
+          """
+          \(mainActorAttribute) \(staticModifier)
+          var ___\(raw: identifier.text): \(type.trimmed) {
+            get \(asyncSpecifier?.trimmed) \(throwsSpecifier?.trimmed) {
+              \(tryOperator) \(awaitOperator) \(raw: identifier.text)
+            }
+          }
+          """
+        )
       case .keyword(.var):
         return []
       default:
