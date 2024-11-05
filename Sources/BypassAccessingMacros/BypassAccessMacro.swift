@@ -9,6 +9,27 @@ public struct BypassAccessMacro: PeerMacro {
     in context: some SwiftSyntaxMacros.MacroExpansionContext
   ) throws -> [SwiftSyntax.DeclSyntax] {
     if let variable = declaration.as(VariableDeclSyntax.self) {
+      guard let identifier = variable.identifier else {
+        let error = MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
+        context.diagnose(
+          Diagnostic(
+            node: node,
+            message: error
+          )
+        )
+        throw error
+      }
+      guard let type = variable.type else {
+        let error = MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
+        context.diagnose(
+          Diagnostic(
+            node: node,
+            message: error
+          )
+        )
+        throw error
+      }
+
       return []
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
