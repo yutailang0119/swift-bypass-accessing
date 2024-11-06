@@ -13,6 +13,12 @@ extension AttributeListSyntax {
   }
 }
 
+extension AttributeSyntax {
+  static var mainActor: Self {
+    self.init(attributeName: TypeSyntax(stringLiteral: "MainActor"))
+  }
+}
+
 extension DeclModifierListSyntax {
   var isInstance: Bool {
     for modifier in self {
