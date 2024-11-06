@@ -31,8 +31,7 @@ public struct BypassAccessMacro: PeerMacro {
       }
 
       let staticModifier: TokenSyntax? = variable.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? =
-        variable.attributes.isMainActor ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
+      let mainActorAttribute: AttributeSyntax? = variable.attributes.isMainActor ? .mainActor : nil
 
       let variableDecl: VariableDeclSyntax
       switch variable.bindingSpecifier.tokenKind {
@@ -96,8 +95,7 @@ public struct BypassAccessMacro: PeerMacro {
       ]
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? =
-        function.attributes.isMainActor ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
+      let mainActorAttribute: AttributeSyntax? = function.attributes.isMainActor ? .mainActor : nil
       let tryOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
       let awaitOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap {
         $0.isAsync ? .keyword(.await) : nil
@@ -128,9 +126,7 @@ public struct BypassAccessMacro: PeerMacro {
         """
       ]
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      let mainActorAttribute: AttributeSyntax? =
-        initializer.attributes.isMainActor
-        ? AttributeSyntax(attributeName: TypeSyntax(stringLiteral: "MainActor")) : nil
+      let mainActorAttribute: AttributeSyntax? = initializer.attributes.isMainActor ? .mainActor : nil
       let tryOperator: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap {
         $0.isThrows ? .keyword(.try) : nil
       }
