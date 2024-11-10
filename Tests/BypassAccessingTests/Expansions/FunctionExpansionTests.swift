@@ -170,4 +170,79 @@ final class FunctionExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testAccessors() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private func greet() throws {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private func greet() throws {}
+
+          #if DEBUG
+          func ___greet() throws {
+            try  greet(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private func greet() async {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private func greet() async {}
+
+          #if DEBUG
+          func ___greet() async {
+             await greet(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private func greet() async throws {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private func greet() async throws {}
+
+          #if DEBUG
+          func ___greet() async throws {
+            try await greet(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
