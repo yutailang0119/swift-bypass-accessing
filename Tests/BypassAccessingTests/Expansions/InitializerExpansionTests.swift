@@ -122,4 +122,34 @@ final class InitializerExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testAttributes() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        @MainActor private init() {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          @MainActor private init() {}
+
+          #if DEBUG
+          @MainActor static
+          func ___init() -> Self {
+              Self.init(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
