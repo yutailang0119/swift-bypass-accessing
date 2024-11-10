@@ -264,4 +264,58 @@ final class InitializerExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testGenerics() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private init<I: BinaryInteger>(times: I) {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private init<I: BinaryInteger>(times: I) {}
+
+          #if DEBUG
+          static
+          func ___init<I: BinaryInteger>(times: I) -> Self {
+              Self.init(
+              times: times
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User<Element> {
+        @BypassAccess
+        private init() where Element: Equatable {}
+      }
+      """,
+      expandedSource: """
+        struct User<Element> {
+          private init() where Element: Equatable {}
+
+          #if DEBUG
+          static
+          func ___init() -> Self where Element: Equatable {
+              Self.init(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
