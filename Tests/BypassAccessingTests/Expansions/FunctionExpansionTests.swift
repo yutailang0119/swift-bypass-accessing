@@ -278,4 +278,64 @@ final class FunctionExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testGenerics() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private func greet<I: BinaryInteger>(times: I) -> String {
+          "He\\(Array(repeating: "ll", count: Int(times)).joined())o"
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private func greet<I: BinaryInteger>(times: I) -> String {
+            "He\\(Array(repeating: "ll", count: Int(times)).joined())o"
+          }
+
+          #if DEBUG
+          func ___greet<I: BinaryInteger>(times: I) -> String {
+              greet(
+              times: times
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User<Element> {
+        @BypassAccess
+        private func number() -> Element where Element == Int {
+          119
+        }
+      }
+      """,
+      expandedSource: """
+        struct User<Element> {
+          private func number() -> Element where Element == Int {
+            119
+          }
+
+          #if DEBUG
+          func ___number() -> Element where Element == Int {
+              number(
+
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
