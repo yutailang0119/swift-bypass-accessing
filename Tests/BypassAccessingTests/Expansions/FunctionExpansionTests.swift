@@ -245,4 +245,37 @@ final class FunctionExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testTypeSpecifiers() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private func nickname(_ name: inout String) {
+          name += "-san"
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private func nickname(_ name: inout String) {
+            name += "-san"
+          }
+
+          #if DEBUG
+          func ___nickname(_ name: inout String) {
+              nickname(
+              _: &name
+            )
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
