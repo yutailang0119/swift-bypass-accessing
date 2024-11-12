@@ -183,4 +183,42 @@ final class PropertyExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testAttributes() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        @MainActor private var name: String {
+          get {
+            "yutailang0119"
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          @MainActor private var name: String {
+            get {
+              "yutailang0119"
+            }
+          }
+
+          #if DEBUG
+          @MainActor
+          var ___name: String {
+            get   {
+                name
+            }
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
