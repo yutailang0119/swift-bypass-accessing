@@ -221,4 +221,103 @@ final class PropertyExpansionTests: XCTestCase {
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
   }
+
+  func testAccessors() throws {
+    #if canImport(BypassAccessingMacros)
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private var name: String {
+          get throws {
+            "yutailang0119"
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private var name: String {
+            get throws {
+              "yutailang0119"
+            }
+          }
+
+          #if DEBUG
+          var ___name: String {
+            get  throws {
+              try  name
+            }
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private var name: String {
+          get async {
+            "yutailang0119"
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private var name: String {
+            get async {
+              "yutailang0119"
+            }
+          }
+
+          #if DEBUG
+          var ___name: String {
+            get async  {
+               await name
+            }
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private var name: String {
+          get async throws {
+            "yutailang0119"
+          }
+        }
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private var name: String {
+            get async throws {
+              "yutailang0119"
+            }
+          }
+
+          #if DEBUG
+          var ___name: String {
+            get async throws {
+              try await name
+            }
+          }
+          #endif
+        }
+        """,
+      macros: testMacros
+    )
+    #else
+    throw XCTSkip("macros are only supported when running tests for the host platform")
+    #endif
+  }
 }
