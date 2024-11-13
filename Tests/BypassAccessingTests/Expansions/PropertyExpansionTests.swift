@@ -51,6 +51,25 @@ final class PropertyExpansionTests: XCTestCase {
         """,
       macros: testMacros
     )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private let name = "yutailang0119"
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private let name = "yutailang0119"
+        }
+        """,
+      diagnostics: [
+        DiagnosticSpec(message: "'@BypassAccess' require TypeAnnotation", line: 2, column: 3, severity: .error),
+        DiagnosticSpec(message: "'@BypassAccess' require TypeAnnotation", line: 2, column: 3, severity: .error),
+      ],
+      macros: testMacros
+    )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
