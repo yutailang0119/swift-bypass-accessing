@@ -65,8 +65,7 @@ final class PropertyExpansionTests: XCTestCase {
         }
         """,
       diagnostics: [
-        DiagnosticSpec(message: "'@BypassAccess' require TypeAnnotation", line: 2, column: 3, severity: .error),
-        DiagnosticSpec(message: "'@BypassAccess' require TypeAnnotation", line: 2, column: 3, severity: .error),
+        DiagnosticSpec(message: "'@BypassAccess' require TypeAnnotation", line: 2, column: 3, severity: .error)
       ],
       macros: testMacros
     )
