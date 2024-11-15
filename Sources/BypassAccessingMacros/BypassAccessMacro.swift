@@ -1,4 +1,3 @@
-import SwiftDiagnostics
 import SwiftSyntax
 import SwiftSyntaxMacros
 
@@ -10,24 +9,10 @@ public struct BypassAccessMacro: PeerMacro {
   ) throws -> [SwiftSyntax.DeclSyntax] {
     if let variable = declaration.as(VariableDeclSyntax.self) {
       guard let identifier = variable.identifier else {
-        let error = MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
-        context.diagnose(
-          Diagnostic(
-            node: node,
-            message: error
-          )
-        )
-        throw error
+        throw MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
       }
       guard let type = variable.type else {
-        let error = MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
-        context.diagnose(
-          Diagnostic(
-            node: node,
-            message: error
-          )
-        )
-        throw error
+        throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
       }
 
       let staticModifier: TokenSyntax? = variable.modifiers.isInstance ? nil : .keyword(.static)
@@ -76,14 +61,7 @@ public struct BypassAccessMacro: PeerMacro {
           """
         )
       default:
-        let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
-        context.diagnose(
-          Diagnostic(
-            node: node,
-            message: error
-          )
-        )
-        throw error
+        throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
       }
 
       return [
@@ -158,14 +136,7 @@ public struct BypassAccessMacro: PeerMacro {
         """
       ]
     } else {
-      let error = MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
-      context.diagnose(
-        Diagnostic(
-          node: node,
-          message: error
-        )
-      )
-      throw error
+      throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
     }
   }
 }
