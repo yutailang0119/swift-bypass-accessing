@@ -13,6 +13,17 @@ extension AttributeListSyntax {
   }
 }
 
+extension AttributeSyntax.Arguments {
+  var isIfDebug: Bool {
+    guard case let .argumentList(arguments) = self else {
+      return true
+    }
+    let argument = arguments.first { $0.label?.tokenKind == .identifier("isIfDebug") }
+    let bool = argument?.expression.as(BooleanLiteralExprSyntax.self)
+    return bool?.literal.tokenKind == .keyword(.true)
+  }
+}
+
 extension AttributeSyntax {
   static var mainActor: Self {
     self.init(attributeName: TypeSyntax(stringLiteral: "MainActor"))
