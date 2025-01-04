@@ -29,10 +29,6 @@ public struct BypassAccessMacro: PeerMacro {
         }
       }
 
-      let modifiers = variable.modifiers.filter {
-        $0.name.tokenKind != .keyword(.private)
-      }
-
       let accessors: AccessorBlockSyntax.Accessors
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
@@ -149,7 +145,9 @@ public struct BypassAccessMacro: PeerMacro {
                     MemberBlockItemSyntax(
                       decl: VariableDeclSyntax(
                         attributes: attributes,
-                        modifiers: modifiers,
+                        modifiers: variable.modifiers.filter {
+                          $0.name.tokenKind != .keyword(.private)
+                        },
                         bindingSpecifier: .keyword(.var),
                         bindings: PatternBindingListSyntax {
                           PatternBindingSyntax(
@@ -182,10 +180,6 @@ public struct BypassAccessMacro: PeerMacro {
         case .ifConfigDecl:
           return true
         }
-      }
-
-      let modifiers = function.modifiers.filter {
-        $0.name.tokenKind != .keyword(.private)
       }
 
       let expression: any ExprSyntaxProtocol = {
@@ -233,7 +227,9 @@ public struct BypassAccessMacro: PeerMacro {
                     MemberBlockItemSyntax(
                       decl: FunctionDeclSyntax(
                         attributes: attributes,
-                        modifiers: modifiers,
+                        modifiers: function.modifiers.filter {
+                          $0.name.tokenKind != .keyword(.private)
+                        },
                         name: .identifier("___\(function.name.text)"),
                         genericParameterClause: function.genericParameterClause,
                         signature: function.signature,
@@ -270,14 +266,6 @@ public struct BypassAccessMacro: PeerMacro {
           return true
         }
       }
-
-      let modifiers: DeclModifierListSyntax = {
-        var ms = initializer.modifiers.filter {
-          $0.name.tokenKind != .keyword(.private)
-        }
-        ms.append(DeclModifierSyntax(name: .keyword(.static)))
-        return ms
-      }()
 
       let expression: any ExprSyntaxProtocol = {
         var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
@@ -340,7 +328,13 @@ public struct BypassAccessMacro: PeerMacro {
                     MemberBlockItemSyntax(
                       decl: FunctionDeclSyntax(
                         attributes: attributes,
-                        modifiers: modifiers,
+                        modifiers: {
+                          var ms = initializer.modifiers.filter {
+                            $0.name.tokenKind != .keyword(.private)
+                          }
+                          ms.append(DeclModifierSyntax(name: .keyword(.static)))
+                          return ms
+                        }(),
                         name: .identifier("___init"),
                         genericParameterClause: initializer.genericParameterClause,
                         signature: FunctionSignatureSyntax(
