@@ -66,11 +66,24 @@ public struct BypassAccessMacro: PeerMacro {
       }
 
       return [
-        """
-        #if DEBUG
-        \(variableDecl.trimmed.formatted())
-        #endif
-        """
+        DeclSyntax(
+          IfConfigDeclSyntax(
+            clauses: IfConfigClauseListSyntax {
+              IfConfigClauseSyntax(
+                poundKeyword: .poundIfToken(),
+                condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                elements: .decls(
+                  MemberBlockItemListSyntax {
+                    MemberBlockItemSyntax(
+                      decl: variableDecl
+                    )
+                  }
+                )
+              )
+            },
+            poundEndif: .poundEndifToken()
+          )
+        )
       ]
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
       let attributes = function.attributes.filter {
