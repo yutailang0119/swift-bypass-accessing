@@ -160,36 +160,115 @@ public struct BypassAccessMacro: PeerMacro {
         )
       ]
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      let mainActorAttribute: AttributeSyntax? = initializer.attributes.isMainActor ? .mainActor : nil
-      let tryOperator: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap {
-        $0.isThrows ? .keyword(.try) : nil
-      }
-      let awaitOperator: TokenSyntax? = initializer.signature.effectSpecifiers
-        .flatMap { $0.isAsync ? .keyword(.await) : nil }
-
-      let functionDecl = try FunctionDeclSyntax(
-        """
-        \(mainActorAttribute) static
-        func ___init\(initializer.genericParameterClause)\(initializer.signature.trimmed) -> Self\(initializer.optionalMark) \(initializer.genericWhereClause){
-          \(tryOperator) \(awaitOperator) Self.init(
-            \(
-                raw: initializer.signature.parameterClause.parameters
-                    .map {
-                      let inoutAmpersand: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
-                      return "\($0.firstName.trimmed): \(inoutAmpersand?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
-                    }
-                    .joined(separator: ",\n")
-            )
-          )
+      let attributes = initializer.attributes.filter {
+        switch $0 {
+        case .attribute(let attribute):
+          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
+            return identifier.name.tokenKind != .identifier("BypassAccess")
+          } else {
+            return true
+          }
+        case .ifConfigDecl:
+          return true
         }
-        """
-      )
+      }
+
+      let modifiers: DeclModifierListSyntax = {
+        var ms = initializer.modifiers.filter {
+          $0.name.tokenKind != .keyword(.private)
+        }
+        ms.append(DeclModifierSyntax(name: .keyword(.static)))
+        return ms
+      }()
+
+      let expression: any ExprSyntaxProtocol = {
+        var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+          calledExpression: MemberAccessExprSyntax(
+            base: DeclReferenceExprSyntax(
+              baseName: .keyword(.Self)
+            ),
+            declName: DeclReferenceExprSyntax(
+              baseName: .keyword(.`init`)
+            )
+          ),
+          leftParen: .leftParenToken(),
+          arguments: LabeledExprListSyntax {
+            initializer.signature.parameterClause.parameters.map {
+              var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: $0.secondName ?? $0.firstName)
+              if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                expression = InOutExprSyntax(expression: expression)
+              }
+              return LabeledExprListSyntax.Element(
+                label: $0.firstName.trimmed,
+                colon: .colonToken(trailingTrivia: .space),
+                expression: expression
+              )
+            }
+          },
+          rightParen: .rightParenToken()
+        )
+
+        if initializer.signature.effectSpecifiers?.isAsync ?? false {
+          expr = AwaitExprSyntax(expression: expr)
+        }
+
+        if initializer.signature.effectSpecifiers?.isThrows ?? false {
+          expr = TryExprSyntax(expression: expr)
+        }
+
+        return expr
+      }()
+
+      let returnType: any TypeSyntaxProtocol = {
+        let type = IdentifierTypeSyntax(name: .keyword(.Self))
+        if initializer.optionalMark?.tokenKind == .postfixQuestionMark {
+          return OptionalTypeSyntax(wrappedType: type)
+        } else if initializer.optionalMark?.tokenKind == .exclamationMark {
+          return ImplicitlyUnwrappedOptionalTypeSyntax(wrappedType: type)
+        } else {
+          return type
+        }
+      }()
+
       return [
-        """
-        #if DEBUG
-        \(functionDecl.trimmed.formatted())
-        #endif
-        """
+        DeclSyntax(
+          IfConfigDeclSyntax(
+            clauses: IfConfigClauseListSyntax {
+              IfConfigClauseSyntax(
+                poundKeyword: .poundIfToken(),
+                condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                elements: .decls(
+                  MemberBlockItemListSyntax {
+                    MemberBlockItemSyntax(
+                      decl: FunctionDeclSyntax(
+                        attributes: attributes,
+                        modifiers: modifiers,
+                        name: .identifier("___init"),
+                        genericParameterClause: initializer.genericParameterClause,
+                        signature: FunctionSignatureSyntax(
+                          parameterClause: initializer.signature.parameterClause,
+                          effectSpecifiers: initializer.signature.effectSpecifiers,
+                          returnClause: ReturnClauseSyntax(type: returnType)
+                        ),
+                        genericWhereClause: initializer.genericWhereClause,
+                        body: CodeBlockSyntax(
+                          statements: CodeBlockItemListSyntax {
+                            CodeBlockItemSyntax(
+                              item: .expr(
+                                ExprSyntax(expression)
+                              )
+                            )
+                          }
+                        )
+                      )
+                    )
+                  }
+                )
+              )
+            },
+            poundEndif: .poundEndifToken()
+          )
+        )
       ]
     } else {
       throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
