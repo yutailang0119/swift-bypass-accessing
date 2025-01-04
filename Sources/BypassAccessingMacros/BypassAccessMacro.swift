@@ -145,9 +145,7 @@ public struct BypassAccessMacro: PeerMacro {
                     MemberBlockItemSyntax(
                       decl: VariableDeclSyntax(
                         attributes: attributes,
-                        modifiers: variable.modifiers.filter {
-                          $0.name.tokenKind != .keyword(.private)
-                        },
+                        modifiers: variable.modifiers.filter(.keyword(.private)),
                         bindingSpecifier: .keyword(.var),
                         bindings: PatternBindingListSyntax {
                           PatternBindingSyntax(
@@ -227,9 +225,7 @@ public struct BypassAccessMacro: PeerMacro {
                     MemberBlockItemSyntax(
                       decl: FunctionDeclSyntax(
                         attributes: attributes,
-                        modifiers: function.modifiers.filter {
-                          $0.name.tokenKind != .keyword(.private)
-                        },
+                        modifiers: function.modifiers.filter(.keyword(.private)),
                         name: .identifier("___\(function.name.text)"),
                         genericParameterClause: function.genericParameterClause,
                         signature: function.signature,
@@ -329,11 +325,9 @@ public struct BypassAccessMacro: PeerMacro {
                       decl: FunctionDeclSyntax(
                         attributes: attributes,
                         modifiers: {
-                          var ms = initializer.modifiers.filter {
-                            $0.name.tokenKind != .keyword(.private)
-                          }
-                          ms.append(DeclModifierSyntax(name: .keyword(.static)))
-                          return ms
+                          var modifiers = initializer.modifiers.filter(.keyword(.private))
+                          modifiers.append(DeclModifierSyntax(name: .keyword(.static)))
+                          return modifiers
                         }(),
                         name: .identifier("___init"),
                         genericParameterClause: initializer.genericParameterClause,

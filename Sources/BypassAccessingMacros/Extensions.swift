@@ -30,6 +30,12 @@ extension DeclModifierListSyntax {
     }
     return true
   }
+
+  func filter(_ tokenKind: TokenKind) -> DeclModifierListSyntax {
+    self.filter {
+      $0.name.tokenKind != tokenKind
+    }
+  }
 }
 
 extension VariableDeclSyntax {
