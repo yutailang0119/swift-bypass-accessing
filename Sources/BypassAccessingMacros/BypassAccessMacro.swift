@@ -34,15 +34,12 @@ public struct BypassAccessMacro: PeerMacro {
         let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
         let expression: any ExprSyntaxProtocol = {
           var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
-
           if effectSpecifiers?.asyncSpecifier != nil {
             expr = AwaitExprSyntax(expression: expr)
           }
-
           if effectSpecifiers?.throwsClause != nil {
             expr = TryExprSyntax(expression: expr)
           }
-
           return expr
         }()
 
@@ -159,15 +156,12 @@ public struct BypassAccessMacro: PeerMacro {
           },
           rightParen: .rightParenToken()
         )
-
         if function.signature.effectSpecifiers?.isAsync ?? false {
           expr = AwaitExprSyntax(expression: expr)
         }
-
         if function.signature.effectSpecifiers?.isThrows ?? false {
           expr = TryExprSyntax(expression: expr)
         }
-
         return expr
       }()
 
@@ -234,15 +228,12 @@ public struct BypassAccessMacro: PeerMacro {
           },
           rightParen: .rightParenToken()
         )
-
         if initializer.signature.effectSpecifiers?.isAsync ?? false {
           expr = AwaitExprSyntax(expression: expr)
         }
-
         if initializer.signature.effectSpecifiers?.isThrows ?? false {
           expr = TryExprSyntax(expression: expr)
         }
-
         return expr
       }()
 
