@@ -30,7 +30,7 @@ public struct BypassAccessMacro: PeerMacro {
             )
           }
         )
-      case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
+      case .keyword(.var) where variable.isComputedSet:
         let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
 
         let expression: any ExprSyntaxProtocol = {
