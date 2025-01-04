@@ -1,17 +1,6 @@
 import SwiftSyntax
 
 extension AttributeListSyntax {
-  var isMainActor: Bool {
-    for attribute in self {
-      for token in attribute.tokens(viewMode: .all) {
-        if token.tokenKind == .identifier("MainActor") {
-          return true
-        }
-      }
-    }
-    return false
-  }
-
   func filter(_ tokenKind: TokenKind) -> AttributeListSyntax {
     self.filter {
       switch $0 {
@@ -25,12 +14,6 @@ extension AttributeListSyntax {
         return true
       }
     }
-  }
-}
-
-extension AttributeSyntax {
-  static var mainActor: Self {
-    self.init(attributeName: TypeSyntax(stringLiteral: "MainActor"))
   }
 }
 
@@ -100,16 +83,6 @@ extension VariableDeclSyntax {
 
   var isComputedSet: Bool {
     isComputed && accessorsMatching({ $0 == .keyword(.set) }).isEmpty
-  }
-}
-
-extension FunctionEffectSpecifiersSyntax {
-  var isAsync: Bool {
-    asyncSpecifier != nil
-  }
-
-  var isThrows: Bool {
-    throwsClause != nil
   }
 }
 
