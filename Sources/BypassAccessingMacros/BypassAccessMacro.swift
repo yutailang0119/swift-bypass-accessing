@@ -16,51 +16,219 @@ public struct BypassAccessMacro: PeerMacro {
         throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
       }
 
-      let staticModifier: TokenSyntax? = variable.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? = variable.attributes.isMainActor ? .mainActor : nil
+      let attributes = variable.attributes.filter {
+        switch $0 {
+        case .attribute(let attribute):
+          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
+            return identifier.name.tokenKind != .identifier("BypassAccess")
+          } else {
+            return true
+          }
+        case .ifConfigDecl:
+          return true
+        }
+      }
+
+      let modifiers = variable.modifiers.filter {
+        $0.name.tokenKind != .keyword(.private)
+      }
 
       let variableDecl: VariableDeclSyntax
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            \(raw: identifier.text)
-          }
-          """
-        )
+        return [
+          DeclSyntax(
+            IfConfigDeclSyntax(
+              clauses: IfConfigClauseListSyntax {
+                IfConfigClauseSyntax(
+                  poundKeyword: .poundIfToken(),
+                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                  elements: .decls(
+                    MemberBlockItemListSyntax {
+                      MemberBlockItemSyntax(
+                        decl: VariableDeclSyntax(
+                          attributes: attributes,
+                          modifiers: modifiers,
+                          bindingSpecifier: .keyword(.var),
+                          bindings: PatternBindingListSyntax {
+                            PatternBindingSyntax(
+                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+                              typeAnnotation: TypeAnnotationSyntax(type: type),
+                              accessorBlock: AccessorBlockSyntax(
+                                accessors: .getter(
+                                  CodeBlockItemListSyntax {
+                                    CodeBlockItemSyntax(
+                                      item: .expr(
+                                        ExprSyntax(
+                                          DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+                                        )
+                                      )
+                                    )
+                                  }
+                                )
+                              )
+                            )
+                          }
+                        )
+                      )
+                    }
+                  )
+                )
+              },
+              poundEndif: .poundEndifToken()
+            )
+          )
+        ]
       case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
-        let accessorEffectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
-        let asyncSpecifier = accessorEffectSpecifiers?.asyncSpecifier
-        let throwsSpecifier = accessorEffectSpecifiers?.throwsClause?.throwsSpecifier
-        let tryOperator: TokenSyntax? = throwsSpecifier != nil ? .keyword(.try) : nil
-        let awaitOperator: TokenSyntax? = asyncSpecifier != nil ? .keyword(.await) : nil
+        let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
 
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            get \(asyncSpecifier?.trimmed) \(throwsSpecifier?.trimmed) {
-              \(tryOperator) \(awaitOperator) \(raw: identifier.text)
-            }
+        let expression: any ExprSyntaxProtocol = {
+          var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+
+          if effectSpecifiers?.asyncSpecifier != nil {
+            expr = AwaitExprSyntax(expression: expr)
           }
-          """
-        )
+
+          if effectSpecifiers?.throwsClause != nil {
+            expr = TryExprSyntax(expression: expr)
+          }
+
+          return expr
+        }()
+
+        return [
+          DeclSyntax(
+            IfConfigDeclSyntax(
+              clauses: IfConfigClauseListSyntax {
+                IfConfigClauseSyntax(
+                  poundKeyword: .poundIfToken(),
+                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                  elements: .decls(
+                    MemberBlockItemListSyntax {
+                      MemberBlockItemSyntax(
+                        decl: VariableDeclSyntax(
+                          attributes: attributes,
+                          modifiers: modifiers,
+                          bindingSpecifier: .keyword(.var),
+                          bindings: PatternBindingListSyntax {
+                            PatternBindingSyntax(
+                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+                              typeAnnotation: TypeAnnotationSyntax(type: type),
+                              accessorBlock: AccessorBlockSyntax(
+                                accessors: .accessors(
+                                  AccessorDeclListSyntax {
+                                    AccessorDeclSyntax(
+                                      accessorSpecifier: .keyword(.get),
+                                      effectSpecifiers: effectSpecifiers,
+                                      body: CodeBlockSyntax(
+                                        statements: CodeBlockItemListSyntax {
+                                          CodeBlockItemSyntax(
+                                            item: .expr(
+                                              ExprSyntax(expression)
+                                            )
+                                          )
+                                        }
+                                      )
+                                    )
+                                  }
+                                )
+                              )
+                            )
+                          }
+                        )
+                      )
+                    }
+                  )
+                )
+              },
+              poundEndif: .poundEndifToken()
+            )
+          )
+        ]
       case .keyword(.var):
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            get {
-              \(raw: identifier.text)
-            }
-            set {
-              \(raw: identifier.text) = newValue
-            }
+        let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
+
+        let expression: any ExprSyntaxProtocol = {
+          var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+
+          if effectSpecifiers?.asyncSpecifier != nil {
+            expr = AwaitExprSyntax(expression: expr)
           }
-          """
-        )
+
+          if effectSpecifiers?.throwsClause != nil {
+            expr = TryExprSyntax(expression: expr)
+          }
+
+          return expr
+        }()
+
+        return [
+          DeclSyntax(
+            IfConfigDeclSyntax(
+              clauses: IfConfigClauseListSyntax {
+                IfConfigClauseSyntax(
+                  poundKeyword: .poundIfToken(),
+                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                  elements: .decls(
+                    MemberBlockItemListSyntax {
+                      MemberBlockItemSyntax(
+                        decl: VariableDeclSyntax(
+                          attributes: attributes,
+                          modifiers: modifiers,
+                          bindingSpecifier: .keyword(.var),
+                          bindings: PatternBindingListSyntax {
+                            PatternBindingSyntax(
+                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+                              typeAnnotation: TypeAnnotationSyntax(type: type),
+                              accessorBlock: AccessorBlockSyntax(
+                                accessors: .accessors(
+                                  AccessorDeclListSyntax {
+                                    AccessorDeclSyntax(
+                                      accessorSpecifier: .keyword(.get),
+                                      effectSpecifiers: effectSpecifiers,
+                                      body: CodeBlockSyntax(
+                                        statements: CodeBlockItemListSyntax {
+                                          CodeBlockItemSyntax(
+                                            item: .expr(
+                                              ExprSyntax(expression)
+                                            )
+                                          )
+                                        }
+                                      )
+                                    )
+                                    AccessorDeclSyntax(
+                                      accessorSpecifier: .keyword(.set),
+                                      effectSpecifiers: effectSpecifiers,
+                                      body: CodeBlockSyntax(
+                                        statements: CodeBlockItemListSyntax {
+                                          CodeBlockItemSyntax(
+                                            item: .expr(
+                                              ExprSyntax(
+                                                InfixOperatorExprSyntax(
+                                                  leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
+                                                  operator: AssignmentExprSyntax(equal: .equalToken()),
+                                                  rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue")))
+                                              )
+                                            )
+                                          )
+                                        }
+                                      )
+                                    )
+                                  }
+                                )
+                              )
+                            )
+                          }
+                        )
+                      )
+                    }
+                  )
+                )
+              },
+              poundEndif: .poundEndifToken()
+            )
+          )
+        ]
       default:
         throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
       }
