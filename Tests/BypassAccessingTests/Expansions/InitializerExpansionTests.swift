@@ -17,11 +17,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init() {}
 
           #if DEBUG
-          static
-          func ___init() -> Self {
-              Self.init(
-
-            )
+          static func ___init() -> Self {
+              Self.init()
           }
           #endif
         }
@@ -45,11 +42,8 @@ final class InitializerExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          static
-          func ___init(name: String) -> Self {
-              Self.init(
-              name: name
-            )
+          static func ___init(name: String) -> Self {
+              Self.init(name: name)
           }
           #endif
         }
@@ -79,11 +73,8 @@ final class InitializerExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          static
-          func ___init() -> Self? {
-              Self.init(
-
-            )
+          static func ___init() -> Self? {
+              Self.init()
           }
           #endif
         }
@@ -107,11 +98,8 @@ final class InitializerExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          static
-          func ___init() -> Self! {
-              Self.init(
-
-            )
+          static func ___init() -> Self! {
+              Self.init()
           }
           #endif
         }
@@ -137,11 +125,8 @@ final class InitializerExpansionTests: XCTestCase {
           @MainActor private init() {}
 
           #if DEBUG
-          @MainActor static
-          func ___init() -> Self {
-              Self.init(
-
-            )
+            @MainActor static func ___init() -> Self {
+              Self.init()
           }
           #endif
         }
@@ -167,11 +152,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init() throws {}
 
           #if DEBUG
-          static
-          func ___init() throws -> Self {
-            try  Self.init(
-
-            )
+          static func ___init() throws -> Self {
+              try Self.init()
           }
           #endif
         }
@@ -191,11 +173,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init() async {}
 
           #if DEBUG
-          static
-          func ___init() async -> Self {
-             await Self.init(
-
-            )
+          static func ___init() async -> Self {
+              await Self.init()
           }
           #endif
         }
@@ -215,11 +194,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init() async throws {}
 
           #if DEBUG
-          static
-          func ___init() async throws -> Self {
-            try await Self.init(
-
-            )
+          static func ___init() async throws -> Self {
+              try await Self.init()
           }
           #endif
         }
@@ -249,11 +225,8 @@ final class InitializerExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          static
-          func ___init(name: inout String) -> Self {
-              Self.init(
-              name: &name
-            )
+          static func ___init(name: inout String) -> Self {
+              Self.init(name: &name)
           }
           #endif
         }
@@ -279,11 +252,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init<I: BinaryInteger>(times: I) {}
 
           #if DEBUG
-          static
-          func ___init<I: BinaryInteger>(times: I) -> Self {
-              Self.init(
-              times: times
-            )
+          static func ___init<I: BinaryInteger>(times: I) -> Self {
+              Self.init(times: times)
           }
           #endif
         }
@@ -303,11 +273,8 @@ final class InitializerExpansionTests: XCTestCase {
           private init() where Element: Equatable {}
 
           #if DEBUG
-          static
-          func ___init() -> Self where Element: Equatable {
-              Self.init(
-
-            )
+          static func ___init() -> Self where Element: Equatable {
+              Self.init()
           }
           #endif
         }
