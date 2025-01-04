@@ -30,43 +30,8 @@ public struct BypassAccessMacro: PeerMacro {
             )
           }
         )
-      case .keyword(.var) where variable.isComputedSet:
-        let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
-
-        let expression: any ExprSyntaxProtocol = {
-          var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
-
-          if effectSpecifiers?.asyncSpecifier != nil {
-            expr = AwaitExprSyntax(expression: expr)
-          }
-
-          if effectSpecifiers?.throwsClause != nil {
-            expr = TryExprSyntax(expression: expr)
-          }
-
-          return expr
-        }()
-
-        accessors = .accessors(
-          AccessorDeclListSyntax {
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.get),
-              effectSpecifiers: effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(expression)
-                    )
-                  )
-                }
-              )
-            )
-          }
-        )
       case .keyword(.var):
         let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
-
         let expression: any ExprSyntaxProtocol = {
           var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
 
@@ -81,41 +46,60 @@ public struct BypassAccessMacro: PeerMacro {
           return expr
         }()
 
-        accessors = .accessors(
-          AccessorDeclListSyntax {
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.get),
-              effectSpecifiers: effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(expression)
-                    )
-                  )
-                }
-              )
-            )
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.set),
-              effectSpecifiers: effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(
-                        InfixOperatorExprSyntax(
-                          leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
-                          operator: AssignmentExprSyntax(equal: .equalToken()),
-                          rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue")))
+        if variable.isComputedSet {
+          accessors = .accessors(
+            AccessorDeclListSyntax {
+              AccessorDeclSyntax(
+                accessorSpecifier: .keyword(.get),
+                effectSpecifiers: effectSpecifiers,
+                body: CodeBlockSyntax(
+                  statements: CodeBlockItemListSyntax {
+                    CodeBlockItemSyntax(
+                      item: .expr(
+                        ExprSyntax(expression)
                       )
                     )
-                  )
-                }
+                  }
+                )
               )
-            )
-          }
-        )
+            }
+          )
+        } else {
+          accessors = .accessors(
+            AccessorDeclListSyntax {
+              AccessorDeclSyntax(
+                accessorSpecifier: .keyword(.get),
+                effectSpecifiers: effectSpecifiers,
+                body: CodeBlockSyntax(
+                  statements: CodeBlockItemListSyntax {
+                    CodeBlockItemSyntax(
+                      item: .expr(
+                        ExprSyntax(expression)
+                      )
+                    )
+                  }
+                )
+              )
+              AccessorDeclSyntax(
+                accessorSpecifier: .keyword(.set),
+                effectSpecifiers: effectSpecifiers,
+                body: CodeBlockSyntax(
+                  statements: CodeBlockItemListSyntax {
+                    CodeBlockItemSyntax(
+                      item: .expr(
+                        ExprSyntax(
+                          InfixOperatorExprSyntax(
+                            leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
+                            operator: AssignmentExprSyntax(equal: .equalToken()),
+                            rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue")))
+                        )
+                      )
+                    )
+                  }
+                )
+              )
+            }
+          )}
       default:
         throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
       }
