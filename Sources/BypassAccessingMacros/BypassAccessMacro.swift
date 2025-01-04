@@ -73,36 +73,91 @@ public struct BypassAccessMacro: PeerMacro {
         """
       ]
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
-      let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? = function.attributes.isMainActor ? .mainActor : nil
-      let tryOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
-      let awaitOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap {
-        $0.isAsync ? .keyword(.await) : nil
+      let attributes = function.attributes.filter {
+        switch $0 {
+        case .attribute(let attribute):
+          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
+            return identifier.name.tokenKind != .identifier("BypassAccess")
+          } else {
+            return true
+          }
+        case .ifConfigDecl:
+          return true
+        }
       }
 
-      let functionDecl = try FunctionDeclSyntax(
-        """
-        \(mainActorAttribute) \(staticModifier)
-        func ___\(function.name)\(function.genericParameterClause)\(function.signature.trimmed) \(function.genericWhereClause){
-          \(tryOperator) \(awaitOperator) \(function.name)(
-            \(
-                raw: function.signature.parameterClause.parameters
-                    .map {
-                      let inoutAmpersand: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
-                      return "\($0.firstName.trimmed): \(inoutAmpersand?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
-                    }
-                    .joined(separator: ",\n")
-            )
-          )
+      let modifiers = function.modifiers.filter {
+        $0.name.tokenKind != .keyword(.private)
+      }
+
+      let expression: any ExprSyntaxProtocol = {
+        var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+          calledExpression: DeclReferenceExprSyntax(
+            baseName: function.name
+          ),
+          leftParen: .leftParenToken(),
+          arguments: LabeledExprListSyntax {
+            function.signature.parameterClause.parameters.map {
+              var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: $0.secondName ?? $0.firstName)
+              if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                expression = InOutExprSyntax(expression: expression)
+              }
+              return LabeledExprListSyntax.Element(
+                label: $0.firstName.trimmed,
+                colon: .colonToken(trailingTrivia: .space),
+                expression: expression
+              )
+            }
+          },
+          rightParen: .rightParenToken()
+        )
+
+        if function.signature.effectSpecifiers?.isAsync ?? false {
+          expr = AwaitExprSyntax(expression: expr)
         }
-        """
-      )
+
+        if function.signature.effectSpecifiers?.isThrows ?? false {
+          expr = TryExprSyntax(expression: expr)
+        }
+
+        return expr
+      }()
+
       return [
-        """
-        #if DEBUG
-        \(functionDecl.trimmed.formatted())
-        #endif
-        """
+        DeclSyntax(
+          IfConfigDeclSyntax(
+            clauses: IfConfigClauseListSyntax {
+              IfConfigClauseSyntax(
+                poundKeyword: .poundIfToken(),
+                condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+                elements: .decls(
+                  MemberBlockItemListSyntax {
+                    MemberBlockItemSyntax(
+                      decl: FunctionDeclSyntax(
+                        attributes: attributes,
+                        modifiers: modifiers,
+                        name: .identifier("___\(function.name.text)"),
+                        genericParameterClause: function.genericParameterClause,
+                        signature: function.signature,
+                        genericWhereClause: function.genericWhereClause,
+                        body: CodeBlockSyntax(
+                          statements: CodeBlockItemListSyntax {
+                            CodeBlockItemSyntax(
+                              item: .expr(
+                                ExprSyntax(expression)
+                              )
+                            )
+                          }
+                        )
+                      )
+                    )
+                  }
+                )
+              )
+            },
+            poundEndif: .poundEndifToken()
+          )
+        )
       ]
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
       let mainActorAttribute: AttributeSyntax? = initializer.attributes.isMainActor ? .mainActor : nil
