@@ -18,7 +18,7 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            name
+              name
           }
           #endif
         }
@@ -39,12 +39,12 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get {
-              name
-            }
-            set {
-              name = newValue
-            }
+              get {
+                  name
+              }
+              set {
+                  name = newValue
+              }
           }
           #endif
         }
@@ -93,9 +93,9 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get   {
-                name
-            }
+              get {
+                  name
+              }
           }
           #endif
         }
@@ -130,12 +130,12 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get {
-              name
-            }
-            set {
-              name = newValue
-            }
+              get {
+                  name
+              }
+              set {
+                  name = newValue
+              }
           }
           #endif
         }
@@ -161,9 +161,8 @@ final class PropertyExpansionTests: XCTestCase {
           private static let name: String = "yutailang0119"
 
           #if DEBUG
-          static
-          var ___name: String {
-            name
+          static var ___name: String {
+              name
           }
           #endif
         }
@@ -183,14 +182,13 @@ final class PropertyExpansionTests: XCTestCase {
           private static var name: String = "yutailang0119"
 
           #if DEBUG
-          static
-          var ___name: String {
-            get {
-              name
-            }
-            set {
-              name = newValue
-            }
+          static var ___name: String {
+              get {
+                  name
+              }
+              set {
+                  name = newValue
+              }
           }
           #endif
         }
@@ -224,11 +222,10 @@ final class PropertyExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          @MainActor
-          var ___name: String {
-            get   {
-                name
-            }
+            @MainActor var ___name: String {
+              get {
+                  name
+              }
           }
           #endif
         }
@@ -263,9 +260,9 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get  throws {
-              try  name
-            }
+              get throws {
+                  try name
+              }
           }
           #endif
         }
@@ -294,9 +291,9 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get async  {
-               await name
-            }
+              get async {
+                  await name
+              }
           }
           #endif
         }
@@ -325,9 +322,9 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get async throws {
-              try await name
-            }
+              get async throws {
+                  try await name
+              }
           }
           #endif
         }
