@@ -183,10 +183,10 @@ private extension FunctionDeclSyntax {
         },
         rightParen: .rightParenToken()
       )
-      if signature.effectSpecifiers?.isAsync ?? false {
+      if signature.effectSpecifiers?.asyncSpecifier != nil {
         expr = AwaitExprSyntax(expression: expr)
       }
-      if signature.effectSpecifiers?.isThrows ?? false {
+      if signature.effectSpecifiers?.throwsClause != nil {
         expr = TryExprSyntax(expression: expr)
       }
       return expr
@@ -240,10 +240,10 @@ private extension InitializerDeclSyntax {
         },
         rightParen: .rightParenToken()
       )
-      if signature.effectSpecifiers?.isAsync ?? false {
+      if signature.effectSpecifiers?.asyncSpecifier != nil {
         expr = AwaitExprSyntax(expression: expr)
       }
-      if signature.effectSpecifiers?.isThrows ?? false {
+      if signature.effectSpecifiers?.throwsClause != nil {
         expr = TryExprSyntax(expression: expr)
       }
       return expr
