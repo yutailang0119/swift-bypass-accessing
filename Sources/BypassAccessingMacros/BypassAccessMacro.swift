@@ -16,19 +16,6 @@ public struct BypassAccessMacro: PeerMacro {
         throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
       }
 
-      let attributes = variable.attributes.filter {
-        switch $0 {
-        case .attribute(let attribute):
-          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
-            return identifier.name.tokenKind != .identifier("BypassAccess")
-          } else {
-            return true
-          }
-        case .ifConfigDecl:
-          return true
-        }
-      }
-
       let accessors: AccessorBlockSyntax.Accessors
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
@@ -144,7 +131,7 @@ public struct BypassAccessMacro: PeerMacro {
                   MemberBlockItemListSyntax {
                     MemberBlockItemSyntax(
                       decl: VariableDeclSyntax(
-                        attributes: attributes,
+                        attributes: variable.attributes.filter(.identifier("BypassAccess")),
                         modifiers: variable.modifiers.filter(.keyword(.private)),
                         bindingSpecifier: .keyword(.var),
                         bindings: PatternBindingListSyntax {
@@ -167,19 +154,6 @@ public struct BypassAccessMacro: PeerMacro {
         )
       ]
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
-      let attributes = function.attributes.filter {
-        switch $0 {
-        case .attribute(let attribute):
-          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
-            return identifier.name.tokenKind != .identifier("BypassAccess")
-          } else {
-            return true
-          }
-        case .ifConfigDecl:
-          return true
-        }
-      }
-
       let expression: any ExprSyntaxProtocol = {
         var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
           calledExpression: DeclReferenceExprSyntax(
@@ -224,7 +198,7 @@ public struct BypassAccessMacro: PeerMacro {
                   MemberBlockItemListSyntax {
                     MemberBlockItemSyntax(
                       decl: FunctionDeclSyntax(
-                        attributes: attributes,
+                        attributes: function.attributes.filter(.identifier("BypassAccess")),
                         modifiers: function.modifiers.filter(.keyword(.private)),
                         name: .identifier("___\(function.name.text)"),
                         genericParameterClause: function.genericParameterClause,
@@ -250,19 +224,6 @@ public struct BypassAccessMacro: PeerMacro {
         )
       ]
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      let attributes = initializer.attributes.filter {
-        switch $0 {
-        case .attribute(let attribute):
-          if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
-            return identifier.name.tokenKind != .identifier("BypassAccess")
-          } else {
-            return true
-          }
-        case .ifConfigDecl:
-          return true
-        }
-      }
-
       let expression: any ExprSyntaxProtocol = {
         var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
           calledExpression: MemberAccessExprSyntax(
@@ -323,7 +284,7 @@ public struct BypassAccessMacro: PeerMacro {
                   MemberBlockItemListSyntax {
                     MemberBlockItemSyntax(
                       decl: FunctionDeclSyntax(
-                        attributes: attributes,
+                        attributes: initializer.attributes.filter(.identifier("BypassAccess")),
                         modifiers: {
                           var modifiers = initializer.modifiers.filter(.keyword(.private))
                           modifiers.append(DeclModifierSyntax(name: .keyword(.static)))

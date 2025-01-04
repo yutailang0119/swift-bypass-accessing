@@ -11,6 +11,21 @@ extension AttributeListSyntax {
     }
     return false
   }
+
+  func filter(_ tokenKind: TokenKind) -> AttributeListSyntax {
+    self.filter {
+      switch $0 {
+      case .attribute(let attribute):
+        if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
+          return identifier.name.tokenKind != tokenKind
+        } else {
+          return true
+        }
+      case .ifConfigDecl:
+        return true
+      }
+    }
+  }
 }
 
 extension AttributeSyntax {
