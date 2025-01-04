@@ -36,49 +36,30 @@ public struct BypassAccessMacro: PeerMacro {
       let variableDecl: VariableDeclSyntax
       switch variable.bindingSpecifier.tokenKind {
       case .keyword(.let):
-        return [
-          DeclSyntax(
-            IfConfigDeclSyntax(
-              clauses: IfConfigClauseListSyntax {
-                IfConfigClauseSyntax(
-                  poundKeyword: .poundIfToken(),
-                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
-                  elements: .decls(
-                    MemberBlockItemListSyntax {
-                      MemberBlockItemSyntax(
-                        decl: VariableDeclSyntax(
-                          attributes: attributes,
-                          modifiers: modifiers,
-                          bindingSpecifier: .keyword(.var),
-                          bindings: PatternBindingListSyntax {
-                            PatternBindingSyntax(
-                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
-                              typeAnnotation: TypeAnnotationSyntax(type: type),
-                              accessorBlock: AccessorBlockSyntax(
-                                accessors: .getter(
-                                  CodeBlockItemListSyntax {
-                                    CodeBlockItemSyntax(
-                                      item: .expr(
-                                        ExprSyntax(
-                                          DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
-                                        )
-                                      )
-                                    )
-                                  }
-                                )
-                              )
-                            )
-                          }
+        variableDecl = VariableDeclSyntax(
+          attributes: attributes,
+          modifiers: modifiers,
+          bindingSpecifier: .keyword(.var),
+          bindings: PatternBindingListSyntax {
+            PatternBindingSyntax(
+              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+              typeAnnotation: TypeAnnotationSyntax(type: type),
+              accessorBlock: AccessorBlockSyntax(
+                accessors: .getter(
+                  CodeBlockItemListSyntax {
+                    CodeBlockItemSyntax(
+                      item: .expr(
+                        ExprSyntax(
+                          DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
                         )
                       )
-                    }
-                  )
+                    )
+                  }
                 )
-              },
-              poundEndif: .poundEndifToken()
+              )
             )
-          )
-        ]
+          }
+        )
       case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
         let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
 
@@ -96,55 +77,36 @@ public struct BypassAccessMacro: PeerMacro {
           return expr
         }()
 
-        return [
-          DeclSyntax(
-            IfConfigDeclSyntax(
-              clauses: IfConfigClauseListSyntax {
-                IfConfigClauseSyntax(
-                  poundKeyword: .poundIfToken(),
-                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
-                  elements: .decls(
-                    MemberBlockItemListSyntax {
-                      MemberBlockItemSyntax(
-                        decl: VariableDeclSyntax(
-                          attributes: attributes,
-                          modifiers: modifiers,
-                          bindingSpecifier: .keyword(.var),
-                          bindings: PatternBindingListSyntax {
-                            PatternBindingSyntax(
-                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
-                              typeAnnotation: TypeAnnotationSyntax(type: type),
-                              accessorBlock: AccessorBlockSyntax(
-                                accessors: .accessors(
-                                  AccessorDeclListSyntax {
-                                    AccessorDeclSyntax(
-                                      accessorSpecifier: .keyword(.get),
-                                      effectSpecifiers: effectSpecifiers,
-                                      body: CodeBlockSyntax(
-                                        statements: CodeBlockItemListSyntax {
-                                          CodeBlockItemSyntax(
-                                            item: .expr(
-                                              ExprSyntax(expression)
-                                            )
-                                          )
-                                        }
-                                      )
-                                    )
-                                  }
-                                )
-                              )
+        variableDecl = VariableDeclSyntax(
+          attributes: attributes,
+          modifiers: modifiers,
+          bindingSpecifier: .keyword(.var),
+          bindings: PatternBindingListSyntax {
+            PatternBindingSyntax(
+              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+              typeAnnotation: TypeAnnotationSyntax(type: type),
+              accessorBlock: AccessorBlockSyntax(
+                accessors: .accessors(
+                  AccessorDeclListSyntax {
+                    AccessorDeclSyntax(
+                      accessorSpecifier: .keyword(.get),
+                      effectSpecifiers: effectSpecifiers,
+                      body: CodeBlockSyntax(
+                        statements: CodeBlockItemListSyntax {
+                          CodeBlockItemSyntax(
+                            item: .expr(
+                              ExprSyntax(expression)
                             )
-                          }
-                        )
+                          )
+                        }
                       )
-                    }
-                  )
+                    )
+                  }
                 )
-              },
-              poundEndif: .poundEndifToken()
+              )
             )
-          )
-        ]
+          }
+        )
       case .keyword(.var):
         let effectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
 
@@ -162,73 +124,54 @@ public struct BypassAccessMacro: PeerMacro {
           return expr
         }()
 
-        return [
-          DeclSyntax(
-            IfConfigDeclSyntax(
-              clauses: IfConfigClauseListSyntax {
-                IfConfigClauseSyntax(
-                  poundKeyword: .poundIfToken(),
-                  condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
-                  elements: .decls(
-                    MemberBlockItemListSyntax {
-                      MemberBlockItemSyntax(
-                        decl: VariableDeclSyntax(
-                          attributes: attributes,
-                          modifiers: modifiers,
-                          bindingSpecifier: .keyword(.var),
-                          bindings: PatternBindingListSyntax {
-                            PatternBindingSyntax(
-                              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
-                              typeAnnotation: TypeAnnotationSyntax(type: type),
-                              accessorBlock: AccessorBlockSyntax(
-                                accessors: .accessors(
-                                  AccessorDeclListSyntax {
-                                    AccessorDeclSyntax(
-                                      accessorSpecifier: .keyword(.get),
-                                      effectSpecifiers: effectSpecifiers,
-                                      body: CodeBlockSyntax(
-                                        statements: CodeBlockItemListSyntax {
-                                          CodeBlockItemSyntax(
-                                            item: .expr(
-                                              ExprSyntax(expression)
-                                            )
-                                          )
-                                        }
-                                      )
-                                    )
-                                    AccessorDeclSyntax(
-                                      accessorSpecifier: .keyword(.set),
-                                      effectSpecifiers: effectSpecifiers,
-                                      body: CodeBlockSyntax(
-                                        statements: CodeBlockItemListSyntax {
-                                          CodeBlockItemSyntax(
-                                            item: .expr(
-                                              ExprSyntax(
-                                                InfixOperatorExprSyntax(
-                                                  leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
-                                                  operator: AssignmentExprSyntax(equal: .equalToken()),
-                                                  rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue")))
-                                              )
-                                            )
-                                          )
-                                        }
-                                      )
-                                    )
-                                  }
-                                )
+        variableDecl = VariableDeclSyntax(
+          attributes: attributes,
+          modifiers: modifiers,
+          bindingSpecifier: .keyword(.var),
+          bindings: PatternBindingListSyntax {
+            PatternBindingSyntax(
+              pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+              typeAnnotation: TypeAnnotationSyntax(type: type),
+              accessorBlock: AccessorBlockSyntax(
+                accessors: .accessors(
+                  AccessorDeclListSyntax {
+                    AccessorDeclSyntax(
+                      accessorSpecifier: .keyword(.get),
+                      effectSpecifiers: effectSpecifiers,
+                      body: CodeBlockSyntax(
+                        statements: CodeBlockItemListSyntax {
+                          CodeBlockItemSyntax(
+                            item: .expr(
+                              ExprSyntax(expression)
+                            )
+                          )
+                        }
+                      )
+                    )
+                    AccessorDeclSyntax(
+                      accessorSpecifier: .keyword(.set),
+                      effectSpecifiers: effectSpecifiers,
+                      body: CodeBlockSyntax(
+                        statements: CodeBlockItemListSyntax {
+                          CodeBlockItemSyntax(
+                            item: .expr(
+                              ExprSyntax(
+                                InfixOperatorExprSyntax(
+                                  leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
+                                  operator: AssignmentExprSyntax(equal: .equalToken()),
+                                  rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue")))
                               )
                             )
-                          }
-                        )
+                          )
+                        }
                       )
-                    }
-                  )
+                    )
+                  }
                 )
-              },
-              poundEndif: .poundEndifToken()
+              )
             )
-          )
-        ]
+          }
+        )
       default:
         throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
       }
