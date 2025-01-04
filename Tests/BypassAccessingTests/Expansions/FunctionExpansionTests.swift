@@ -18,9 +18,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() {
-              greet(
-
-            )
+              greet()
           }
           #endif
         }
@@ -45,10 +43,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet(first f: String, _ second: @escaping () -> String) {
-              greet(
-              first: f,
-              _: second
-            )
+              greet(first: f, _: second)
           }
           #endif
         }
@@ -73,9 +68,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet(to target: String = "World") -> String {
-              greet(
-              to: target
-            )
+              greet(to: target)
           }
           #endif
         }
@@ -101,11 +94,8 @@ final class FunctionExpansionTests: XCTestCase {
           private static func greet() {}
 
           #if DEBUG
-          static
-          func ___greet() {
-              greet(
-
-            )
+          static func ___greet() {
+              greet()
           }
           #endif
         }
@@ -125,11 +115,8 @@ final class FunctionExpansionTests: XCTestCase {
           private class func max() {}
 
           #if DEBUG
-          static
-          func ___max() {
-              max(
-
-            )
+          class func ___max() {
+              max()
           }
           #endif
         }
@@ -155,11 +142,8 @@ final class FunctionExpansionTests: XCTestCase {
           @MainActor private func greet() {}
 
           #if DEBUG
-          @MainActor
-          func ___greet() {
-              greet(
-
-            )
+            @MainActor func ___greet() {
+              greet()
           }
           #endif
         }
@@ -186,9 +170,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() throws {
-            try  greet(
-
-            )
+              try greet()
           }
           #endif
         }
@@ -209,9 +191,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() async {
-             await greet(
-
-            )
+              await greet()
           }
           #endif
         }
@@ -232,9 +212,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() async throws {
-            try await greet(
-
-            )
+              try await greet()
           }
           #endif
         }
@@ -265,9 +243,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___nickname(_ name: inout String) {
-              nickname(
-              _: &name
-            )
+              nickname(_: &name)
           }
           #endif
         }
@@ -298,9 +274,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet<I: BinaryInteger>(times: I) -> String {
-              greet(
-              times: times
-            )
+              greet(times: times)
           }
           #endif
         }
@@ -325,9 +299,7 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___number() -> Element where Element == Int {
-              number(
-
-            )
+              number()
           }
           #endif
         }
