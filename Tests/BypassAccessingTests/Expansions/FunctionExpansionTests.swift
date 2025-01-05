@@ -142,7 +142,7 @@ final class FunctionExpansionTests: XCTestCase {
           @MainActor private func greet() {}
 
           #if DEBUG
-            @MainActor func ___greet() {
+          @MainActor func ___greet() {
               greet()
           }
           #endif

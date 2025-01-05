@@ -157,6 +157,7 @@ private extension VariableDeclSyntax {
         )
       }
     )
+    .trimmed
   }
 }
 
@@ -209,6 +210,7 @@ private extension FunctionDeclSyntax {
         }
       )
     )
+    .trimmed
   }
 }
 
@@ -285,5 +287,6 @@ private extension InitializerDeclSyntax {
         }
       )
     )
+    .trimmed
   }
 }

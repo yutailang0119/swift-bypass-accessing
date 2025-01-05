@@ -222,7 +222,7 @@ final class PropertyExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-            @MainActor var ___name: String {
+          @MainActor var ___name: String {
               get {
                   name
               }

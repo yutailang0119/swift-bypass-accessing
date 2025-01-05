@@ -125,7 +125,7 @@ final class InitializerExpansionTests: XCTestCase {
           @MainActor private init() {}
 
           #if DEBUG
-            @MainActor static func ___init() -> Self {
+          @MainActor static func ___init() -> Self {
               Self.init()
           }
           #endif
