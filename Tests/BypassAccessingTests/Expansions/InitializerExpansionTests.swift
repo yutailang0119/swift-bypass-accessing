@@ -18,12 +18,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() -> Self {
-              Self.init()
+            Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -43,12 +44,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init(name: String) -> Self {
-              Self.init(name: name)
+            Self.init(name: name)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -74,12 +76,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() -> Self? {
-              Self.init()
+            Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -99,12 +102,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() -> Self! {
-              Self.init()
+            Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -126,12 +130,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           @MainActor static func ___init() -> Self {
-              Self.init()
+            Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -153,12 +158,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() throws -> Self {
-              try Self.init()
+            try Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -174,12 +180,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() async -> Self {
-              await Self.init()
+            await Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -195,12 +202,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() async throws -> Self {
-              try await Self.init()
+            try await Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -226,12 +234,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init(name: inout String) -> Self {
-              Self.init(name: &name)
+            Self.init(name: &name)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -253,12 +262,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init<I: BinaryInteger>(times: I) -> Self {
-              Self.init(times: times)
+            Self.init(times: times)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -274,12 +284,13 @@ final class InitializerExpansionTests: XCTestCase {
 
           #if DEBUG
           static func ___init() -> Self where Element: Equatable {
-              Self.init()
+            Self.init()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
