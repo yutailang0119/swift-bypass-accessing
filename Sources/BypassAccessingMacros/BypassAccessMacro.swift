@@ -83,62 +83,46 @@ private extension VariableDeclSyntax {
         return expr
       }()
 
-      if isComputedSet {
-        accessors = .accessors(
-          AccessorDeclListSyntax {
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.get),
-              effectSpecifiers: effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(expression)
-                    )
-                  )
-                }
+      var accessorDeclList = AccessorDeclListSyntax {
+        AccessorDeclSyntax(
+          accessorSpecifier: .keyword(.get),
+          effectSpecifiers: effectSpecifiers,
+          body: CodeBlockSyntax(
+            statements: CodeBlockItemListSyntax {
+              CodeBlockItemSyntax(
+                item: .expr(
+                  ExprSyntax(expression)
+                )
               )
-            )
-          }
+            }
+          )
         )
-      } else {
-        accessors = .accessors(
-          AccessorDeclListSyntax {
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.get),
-              effectSpecifiers: effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(expression)
-                    )
-                  )
-                }
-              )
-            )
-            AccessorDeclSyntax(
-              accessorSpecifier: .keyword(.set),
-              effectSpecifiers: accessorsMatching({ $0 == .keyword(.set) }).first?.effectSpecifiers,
-              body: CodeBlockSyntax(
-                statements: CodeBlockItemListSyntax {
-                  CodeBlockItemSyntax(
-                    item: .expr(
-                      ExprSyntax(
-                        InfixOperatorExprSyntax(
-                          leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
-                          operator: AssignmentExprSyntax(equal: .equalToken()),
-                          rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue"))
-                        )
+      }
+
+      if !isComputedSet {
+        accessorDeclList.append(
+          AccessorDeclSyntax(
+            accessorSpecifier: .keyword(.set),
+            effectSpecifiers: accessorsMatching({ $0 == .keyword(.set) }).first?.effectSpecifiers,
+            body: CodeBlockSyntax(
+              statements: CodeBlockItemListSyntax {
+                CodeBlockItemSyntax(
+                  item: .expr(
+                    ExprSyntax(
+                      InfixOperatorExprSyntax(
+                        leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
+                        operator: AssignmentExprSyntax(equal: .equalToken()),
+                        rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue"))
                       )
                     )
                   )
-                }
-              )
+                )
+              }
             )
-          }
+          )
         )
       }
+      accessors = .accessors(accessorDeclList)
     default:
       throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
     }
