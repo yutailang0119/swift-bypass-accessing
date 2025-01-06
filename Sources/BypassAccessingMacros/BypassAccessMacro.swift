@@ -119,7 +119,7 @@ private extension VariableDeclSyntax {
             )
             AccessorDeclSyntax(
               accessorSpecifier: .keyword(.set),
-              effectSpecifiers: effectSpecifiers,
+              effectSpecifiers: accessorsMatching({ $0 == .keyword(.set) }).first?.effectSpecifiers,
               body: CodeBlockSyntax(
                 statements: CodeBlockItemListSyntax {
                   CodeBlockItemSyntax(
