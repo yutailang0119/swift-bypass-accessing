@@ -72,17 +72,6 @@ private extension VariableDeclSyntax {
       )
     case .keyword(.var):
       let effectSpecifiers = accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
-      let expression: any ExprSyntaxProtocol = {
-        var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
-        if effectSpecifiers?.asyncSpecifier != nil {
-          expr = AwaitExprSyntax(expression: expr)
-        }
-        if effectSpecifiers?.throwsClause != nil {
-          expr = TryExprSyntax(expression: expr)
-        }
-        return expr
-      }()
-
       var accessorDeclList = AccessorDeclListSyntax {
         AccessorDeclSyntax(
           accessorSpecifier: .keyword(.get),
@@ -91,7 +80,18 @@ private extension VariableDeclSyntax {
             statements: CodeBlockItemListSyntax {
               CodeBlockItemSyntax(
                 item: .expr(
-                  ExprSyntax(expression)
+                  ExprSyntax(
+                    fromProtocol: {
+                      var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+                      if effectSpecifiers?.asyncSpecifier != nil {
+                        expr = AwaitExprSyntax(expression: expr)
+                      }
+                      if effectSpecifiers?.throwsClause != nil {
+                        expr = TryExprSyntax(expression: expr)
+                      }
+                      return expr
+                    }()
+                  )
                 )
               )
             }
@@ -147,36 +147,6 @@ private extension VariableDeclSyntax {
 
 private extension FunctionDeclSyntax {
   func decl() -> FunctionDeclSyntax {
-    let expression: any ExprSyntaxProtocol = {
-      var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
-        calledExpression: DeclReferenceExprSyntax(
-          baseName: name
-        ),
-        leftParen: .leftParenToken(),
-        arguments: LabeledExprListSyntax {
-          signature.parameterClause.parameters.map {
-            var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: $0.secondName ?? $0.firstName)
-            if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
-              expression = InOutExprSyntax(expression: expression)
-            }
-            return LabeledExprListSyntax.Element(
-              label: $0.firstName.trimmed,
-              colon: .colonToken(trailingTrivia: .space),
-              expression: expression
-            )
-          }
-        },
-        rightParen: .rightParenToken()
-      )
-      if signature.effectSpecifiers?.asyncSpecifier != nil {
-        expr = AwaitExprSyntax(expression: expr)
-      }
-      if signature.effectSpecifiers?.throwsClause != nil {
-        expr = TryExprSyntax(expression: expr)
-      }
-      return expr
-    }()
-
     return FunctionDeclSyntax(
       attributes: attributes.filter(.identifier("BypassAccess")),
       modifiers: modifiers.filter(.keyword(.private)),
@@ -188,7 +158,39 @@ private extension FunctionDeclSyntax {
         statements: CodeBlockItemListSyntax {
           CodeBlockItemSyntax(
             item: .expr(
-              ExprSyntax(expression)
+              ExprSyntax(
+                fromProtocol: {
+                  var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+                    calledExpression: DeclReferenceExprSyntax(
+                      baseName: name
+                    ),
+                    leftParen: .leftParenToken(),
+                    arguments: LabeledExprListSyntax {
+                      signature.parameterClause.parameters.map {
+                        var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(
+                          baseName: $0.secondName ?? $0.firstName
+                        )
+                        if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                          expression = InOutExprSyntax(expression: expression)
+                        }
+                        return LabeledExprListSyntax.Element(
+                          label: $0.firstName.trimmed,
+                          colon: .colonToken(trailingTrivia: .space),
+                          expression: expression
+                        )
+                      }
+                    },
+                    rightParen: .rightParenToken()
+                  )
+                  if signature.effectSpecifiers?.asyncSpecifier != nil {
+                    expr = AwaitExprSyntax(expression: expr)
+                  }
+                  if signature.effectSpecifiers?.throwsClause != nil {
+                    expr = TryExprSyntax(expression: expr)
+                  }
+                  return expr
+                }()
+              )
             )
           )
         }
@@ -200,41 +202,6 @@ private extension FunctionDeclSyntax {
 
 private extension InitializerDeclSyntax {
   func decl() -> FunctionDeclSyntax {
-    let expression: any ExprSyntaxProtocol = {
-      var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
-        calledExpression: MemberAccessExprSyntax(
-          base: DeclReferenceExprSyntax(
-            baseName: .keyword(.Self)
-          ),
-          declName: DeclReferenceExprSyntax(
-            baseName: .keyword(.`init`)
-          )
-        ),
-        leftParen: .leftParenToken(),
-        arguments: LabeledExprListSyntax {
-          signature.parameterClause.parameters.map {
-            var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: $0.secondName ?? $0.firstName)
-            if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
-              expression = InOutExprSyntax(expression: expression)
-            }
-            return LabeledExprListSyntax.Element(
-              label: $0.firstName.trimmed,
-              colon: .colonToken(trailingTrivia: .space),
-              expression: expression
-            )
-          }
-        },
-        rightParen: .rightParenToken()
-      )
-      if signature.effectSpecifiers?.asyncSpecifier != nil {
-        expr = AwaitExprSyntax(expression: expr)
-      }
-      if signature.effectSpecifiers?.throwsClause != nil {
-        expr = TryExprSyntax(expression: expr)
-      }
-      return expr
-    }()
-
     let returnType: any TypeSyntaxProtocol = {
       let type = IdentifierTypeSyntax(name: .keyword(.Self))
       if optionalMark?.tokenKind == .postfixQuestionMark {
@@ -265,7 +232,44 @@ private extension InitializerDeclSyntax {
         statements: CodeBlockItemListSyntax {
           CodeBlockItemSyntax(
             item: .expr(
-              ExprSyntax(expression)
+              ExprSyntax(
+                fromProtocol: {
+                  var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+                    calledExpression: MemberAccessExprSyntax(
+                      base: DeclReferenceExprSyntax(
+                        baseName: .keyword(.Self)
+                      ),
+                      declName: DeclReferenceExprSyntax(
+                        baseName: .keyword(.`init`)
+                      )
+                    ),
+                    leftParen: .leftParenToken(),
+                    arguments: LabeledExprListSyntax {
+                      signature.parameterClause.parameters.map {
+                        var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(
+                          baseName: $0.secondName ?? $0.firstName
+                        )
+                        if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                          expression = InOutExprSyntax(expression: expression)
+                        }
+                        return LabeledExprListSyntax.Element(
+                          label: $0.firstName.trimmed,
+                          colon: .colonToken(trailingTrivia: .space),
+                          expression: expression
+                        )
+                      }
+                    },
+                    rightParen: .rightParenToken()
+                  )
+                  if signature.effectSpecifiers?.asyncSpecifier != nil {
+                    expr = AwaitExprSyntax(expression: expr)
+                  }
+                  if signature.effectSpecifiers?.throwsClause != nil {
+                    expr = TryExprSyntax(expression: expr)
+                  }
+                  return expr
+                }()
+              )
             )
           )
         }
