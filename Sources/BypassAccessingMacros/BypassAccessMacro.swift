@@ -99,7 +99,7 @@ private extension VariableDeclSyntax {
         )
       }
 
-      if !isComputedSet {
+      if !(isComputed && accessorsMatching({ $0 == .keyword(.set) }).isEmpty) {
         accessorDeclList.append(
           AccessorDeclSyntax(
             accessorSpecifier: .keyword(.set),

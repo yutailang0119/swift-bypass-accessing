@@ -41,20 +41,6 @@ extension VariableDeclSyntax {
     bindings.first?.pattern.as(IdentifierPatternSyntax.self)
   }
 
-  private var isComputed: Bool {
-    if accessorsMatching({ $0 == .keyword(.get) }).count > 0 {
-      return true
-    } else {
-      return bindings.contains { binding in
-        if case .getter = binding.accessorBlock?.accessors {
-          return true
-        } else {
-          return false
-        }
-      }
-    }
-  }
-
   var identifier: TokenSyntax? {
     bindings.first?.pattern.as(IdentifierPatternSyntax.self)?.identifier
   }
@@ -81,8 +67,18 @@ extension VariableDeclSyntax {
     }
   }
 
-  var isComputedSet: Bool {
-    isComputed && accessorsMatching({ $0 == .keyword(.set) }).isEmpty
+  var isComputed: Bool {
+    if accessorsMatching({ $0 == .keyword(.get) }).count > 0 {
+      return true
+    } else {
+      return bindings.contains { binding in
+        if case .getter = binding.accessorBlock?.accessors {
+          return true
+        } else {
+          return false
+        }
+      }
+    }
   }
 }
 
