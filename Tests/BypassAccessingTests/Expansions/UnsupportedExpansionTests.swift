@@ -15,7 +15,7 @@ final class UnsupportedExpansionTests: XCTestCase {
         """,
       diagnostics: [
         DiagnosticSpec(
-          message: "'@BypassAccess' cannot be applied to this declaration",
+          message: "'@BypassAccess' attribute cannot be applied to this declaration",
           line: 1,
           column: 1,
           severity: .error

@@ -42,7 +42,7 @@ private extension BypassAccessMacro {
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
       return initializer.decl()
     } else {
-      throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
+      throw MacroExpansionErrorMessage("'@BypassAccess' attribute cannot be applied to this declaration")
     }
   }
 }
@@ -50,10 +50,10 @@ private extension BypassAccessMacro {
 private extension VariableDeclSyntax {
   func decl() throws -> VariableDeclSyntax {
     guard let identifier = identifier else {
-      throw MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
+      throw MacroExpansionErrorMessage("'@BypassAccess' attribute require Identifier")
     }
     guard let type = type else {
-      throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
+      throw MacroExpansionErrorMessage("'@BypassAccess' attribute require TypeAnnotation")
     }
 
     let accessors: AccessorBlockSyntax.Accessors
@@ -124,7 +124,7 @@ private extension VariableDeclSyntax {
       }
       accessors = .accessors(accessorDeclList)
     default:
-      throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
+      throw MacroExpansionErrorMessage("'@BypassAccess' attribute cannot be applied to this variable")
     }
 
     return VariableDeclSyntax(
