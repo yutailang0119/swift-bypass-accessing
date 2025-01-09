@@ -1,21 +1,19 @@
 import SwiftSyntax
 
 extension AttributeListSyntax {
-  var isMainActor: Bool {
-    for attribute in self {
-      for token in attribute.tokens(viewMode: .all) {
-        if token.tokenKind == .identifier("MainActor") {
+  func filter(_ tokenKind: TokenKind) -> AttributeListSyntax {
+    self.filter {
+      switch $0 {
+      case .attribute(let attribute):
+        if let identifier = attribute.attributeName.as(IdentifierTypeSyntax.self) {
+          return identifier.name.tokenKind != tokenKind
+        } else {
           return true
         }
+      case .ifConfigDecl:
+        return true
       }
     }
-    return false
-  }
-}
-
-extension AttributeSyntax {
-  static var mainActor: Self {
-    self.init(attributeName: TypeSyntax(stringLiteral: "MainActor"))
   }
 }
 
@@ -29,6 +27,12 @@ extension DeclModifierListSyntax {
       }
     }
     return true
+  }
+
+  func filter(_ tokenKind: TokenKind) -> DeclModifierListSyntax {
+    self.filter {
+      $0.name.tokenKind != tokenKind
+    }
   }
 }
 
@@ -75,16 +79,6 @@ extension VariableDeclSyntax {
         }
       }
     }
-  }
-}
-
-extension FunctionEffectSpecifiersSyntax {
-  var isAsync: Bool {
-    asyncSpecifier != nil
-  }
-
-  var isThrows: Bool {
-    throwsClause != nil
   }
 }
 

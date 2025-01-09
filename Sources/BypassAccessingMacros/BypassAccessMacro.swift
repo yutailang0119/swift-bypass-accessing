@@ -1,4 +1,5 @@
 import SwiftSyntax
+import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 public struct BypassAccessMacro: PeerMacro {
@@ -7,136 +8,273 @@ public struct BypassAccessMacro: PeerMacro {
     providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
     in context: some SwiftSyntaxMacros.MacroExpansionContext
   ) throws -> [SwiftSyntax.DeclSyntax] {
+    [
+      DeclSyntax(
+        IfConfigDeclSyntax(
+          clauses: try IfConfigClauseListSyntax {
+            IfConfigClauseSyntax(
+              poundKeyword: .poundIfToken(),
+              condition: DeclReferenceExprSyntax(baseName: .identifier("DEBUG")),
+              elements: .decls(
+                try MemberBlockItemListSyntax {
+                  MemberBlockItemSyntax(
+                    decl: try decl(providingPeersOf: declaration)
+                  )
+                }
+              )
+            )
+          },
+          poundEndif: .poundEndifToken()
+        )
+      )
+    ]
+  }
+}
+
+private extension BypassAccessMacro {
+  static func decl(
+    providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol
+  ) throws -> any SwiftSyntax.DeclSyntaxProtocol {
     if let variable = declaration.as(VariableDeclSyntax.self) {
-      guard let identifier = variable.identifier else {
-        throw MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
-      }
-      guard let type = variable.type else {
-        throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
-      }
-
-      let staticModifier: TokenSyntax? = variable.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? = variable.attributes.isMainActor ? .mainActor : nil
-
-      let variableDecl: VariableDeclSyntax
-      switch variable.bindingSpecifier.tokenKind {
-      case .keyword(.let):
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            \(raw: identifier.text)
-          }
-          """
-        )
-      case .keyword(.var) where variable.isComputed && variable.accessorsMatching({ $0 == .keyword(.set) }).isEmpty:
-        let accessorEffectSpecifiers = variable.accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
-        let asyncSpecifier = accessorEffectSpecifiers?.asyncSpecifier
-        let throwsSpecifier = accessorEffectSpecifiers?.throwsClause?.throwsSpecifier
-        let tryOperator: TokenSyntax? = throwsSpecifier != nil ? .keyword(.try) : nil
-        let awaitOperator: TokenSyntax? = asyncSpecifier != nil ? .keyword(.await) : nil
-
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            get \(asyncSpecifier?.trimmed) \(throwsSpecifier?.trimmed) {
-              \(tryOperator) \(awaitOperator) \(raw: identifier.text)
-            }
-          }
-          """
-        )
-      case .keyword(.var):
-        variableDecl = try VariableDeclSyntax(
-          """
-          \(mainActorAttribute) \(staticModifier)
-          var ___\(raw: identifier.text): \(type.trimmed) {
-            get {
-              \(raw: identifier.text)
-            }
-            set {
-              \(raw: identifier.text) = newValue
-            }
-          }
-          """
-        )
-      default:
-        throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
-      }
-
-      return [
-        """
-        #if DEBUG
-        \(variableDecl.trimmed.formatted())
-        #endif
-        """
-      ]
+      return try variable.decl()
     } else if let function = declaration.as(FunctionDeclSyntax.self) {
-      let staticModifier: TokenSyntax? = function.modifiers.isInstance ? nil : .keyword(.static)
-      let mainActorAttribute: AttributeSyntax? = function.attributes.isMainActor ? .mainActor : nil
-      let tryOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap { $0.isThrows ? .keyword(.try) : nil }
-      let awaitOperator: TokenSyntax? = function.signature.effectSpecifiers.flatMap {
-        $0.isAsync ? .keyword(.await) : nil
-      }
-
-      let functionDecl = try FunctionDeclSyntax(
-        """
-        \(mainActorAttribute) \(staticModifier)
-        func ___\(function.name)\(function.genericParameterClause)\(function.signature.trimmed) \(function.genericWhereClause){
-          \(tryOperator) \(awaitOperator) \(function.name)(
-            \(
-                raw: function.signature.parameterClause.parameters
-                    .map {
-                      let inoutAmpersand: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
-                      return "\($0.firstName.trimmed): \(inoutAmpersand?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
-                    }
-                    .joined(separator: ",\n")
-            )
-          )
-        }
-        """
-      )
-      return [
-        """
-        #if DEBUG
-        \(functionDecl.trimmed.formatted())
-        #endif
-        """
-      ]
+      return function.decl()
     } else if let initializer = declaration.as(InitializerDeclSyntax.self) {
-      let mainActorAttribute: AttributeSyntax? = initializer.attributes.isMainActor ? .mainActor : nil
-      let tryOperator: TokenSyntax? = initializer.signature.effectSpecifiers.flatMap {
-        $0.isThrows ? .keyword(.try) : nil
-      }
-      let awaitOperator: TokenSyntax? = initializer.signature.effectSpecifiers
-        .flatMap { $0.isAsync ? .keyword(.await) : nil }
-
-      let functionDecl = try FunctionDeclSyntax(
-        """
-        \(mainActorAttribute) static
-        func ___init\(initializer.genericParameterClause)\(initializer.signature.trimmed) -> Self\(initializer.optionalMark) \(initializer.genericWhereClause){
-          \(tryOperator) \(awaitOperator) Self.init(
-            \(
-                raw: initializer.signature.parameterClause.parameters
-                    .map {
-                      let inoutAmpersand: TokenSyntax? = $0.type.as(AttributedTypeSyntax.self).flatMap { $0.specifiers.isInout ? TokenSyntax(.prefixAmpersand, presence: .present) : nil }
-                      return "\($0.firstName.trimmed): \(inoutAmpersand?.text ?? "")\($0.secondName?.trimmed ?? $0.firstName.trimmed)"
-                    }
-                    .joined(separator: ",\n")
-            )
-          )
-        }
-        """
-      )
-      return [
-        """
-        #if DEBUG
-        \(functionDecl.trimmed.formatted())
-        #endif
-        """
-      ]
+      return initializer.decl()
     } else {
       throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this declaration")
     }
+  }
+}
+
+private extension VariableDeclSyntax {
+  func decl() throws -> VariableDeclSyntax {
+    guard let identifier = identifier else {
+      throw MacroExpansionErrorMessage("'@BypassAccess' require Identifier")
+    }
+    guard let type = type else {
+      throw MacroExpansionErrorMessage("'@BypassAccess' require TypeAnnotation")
+    }
+
+    let accessors: AccessorBlockSyntax.Accessors
+    switch bindingSpecifier.tokenKind {
+    case .keyword(.let):
+      accessors = .getter(
+        CodeBlockItemListSyntax {
+          CodeBlockItemSyntax(
+            item: .expr(
+              ExprSyntax(
+                DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+              )
+            )
+          )
+        }
+      )
+    case .keyword(.var):
+      var accessorDeclList = AccessorDeclListSyntax {
+        let effectSpecifiers = accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
+        AccessorDeclSyntax(
+          accessorSpecifier: .keyword(.get),
+          effectSpecifiers: effectSpecifiers,
+          body: CodeBlockSyntax(
+            statements: CodeBlockItemListSyntax {
+              CodeBlockItemSyntax(
+                item: .expr(
+                  ExprSyntax(
+                    fromProtocol: {
+                      var expr: any ExprSyntaxProtocol = DeclReferenceExprSyntax(baseName: .identifier(identifier.text))
+                      if effectSpecifiers?.asyncSpecifier != nil {
+                        expr = AwaitExprSyntax(expression: expr)
+                      }
+                      if effectSpecifiers?.throwsClause != nil {
+                        expr = TryExprSyntax(expression: expr)
+                      }
+                      return expr
+                    }()
+                  )
+                )
+              )
+            }
+          )
+        )
+      }
+
+      if !(isComputed && accessorsMatching({ $0 == .keyword(.set) }).isEmpty) {
+        accessorDeclList.append(
+          AccessorDeclSyntax(
+            accessorSpecifier: .keyword(.set),
+            effectSpecifiers: accessorsMatching({ $0 == .keyword(.set) }).first?.effectSpecifiers,
+            body: CodeBlockSyntax(
+              statements: CodeBlockItemListSyntax {
+                CodeBlockItemSyntax(
+                  item: .expr(
+                    ExprSyntax(
+                      InfixOperatorExprSyntax(
+                        leftOperand: DeclReferenceExprSyntax(baseName: .identifier(identifier.text)),
+                        operator: AssignmentExprSyntax(equal: .equalToken()),
+                        rightOperand: DeclReferenceExprSyntax(baseName: .identifier("newValue"))
+                      )
+                    )
+                  )
+                )
+              }
+            )
+          )
+        )
+      }
+      accessors = .accessors(accessorDeclList)
+    default:
+      throw MacroExpansionErrorMessage("'@BypassAccess' cannot be applied to this variable")
+    }
+
+    return VariableDeclSyntax(
+      attributes: attributes.filter(.identifier("BypassAccess")),
+      modifiers: modifiers.filter(.keyword(.private)),
+      bindingSpecifier: .keyword(.var),
+      bindings: PatternBindingListSyntax {
+        PatternBindingSyntax(
+          pattern: IdentifierPatternSyntax(identifier: .identifier("___\(identifier.text)")),
+          typeAnnotation: TypeAnnotationSyntax(type: type),
+          accessorBlock: AccessorBlockSyntax(
+            accessors: accessors
+          )
+        )
+      }
+    )
+    .trimmed
+  }
+}
+
+private extension FunctionDeclSyntax {
+  func decl() -> FunctionDeclSyntax {
+    return FunctionDeclSyntax(
+      attributes: attributes.filter(.identifier("BypassAccess")),
+      modifiers: modifiers.filter(.keyword(.private)),
+      name: .identifier("___\(name.text)"),
+      genericParameterClause: genericParameterClause,
+      signature: signature,
+      genericWhereClause: genericWhereClause,
+      body: CodeBlockSyntax(
+        statements: CodeBlockItemListSyntax {
+          CodeBlockItemSyntax(
+            item: .expr(
+              ExprSyntax(
+                fromProtocol: {
+                  var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+                    calledExpression: DeclReferenceExprSyntax(
+                      baseName: name
+                    ),
+                    leftParen: .leftParenToken(),
+                    arguments: LabeledExprListSyntax {
+                      signature.parameterClause.parameters.map {
+                        var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(
+                          baseName: $0.secondName ?? $0.firstName
+                        )
+                        if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                          expression = InOutExprSyntax(expression: expression)
+                        }
+                        return LabeledExprListSyntax.Element(
+                          label: $0.firstName.trimmed,
+                          colon: .colonToken(trailingTrivia: .space),
+                          expression: expression
+                        )
+                      }
+                    },
+                    rightParen: .rightParenToken()
+                  )
+                  if signature.effectSpecifiers?.asyncSpecifier != nil {
+                    expr = AwaitExprSyntax(expression: expr)
+                  }
+                  if signature.effectSpecifiers?.throwsClause != nil {
+                    expr = TryExprSyntax(expression: expr)
+                  }
+                  return expr
+                }()
+              )
+            )
+          )
+        }
+      )
+    )
+    .trimmed
+  }
+}
+
+private extension InitializerDeclSyntax {
+  func decl() -> FunctionDeclSyntax {
+    let returnType: any TypeSyntaxProtocol = {
+      let type = IdentifierTypeSyntax(name: .keyword(.Self))
+      if optionalMark?.tokenKind == .postfixQuestionMark {
+        return OptionalTypeSyntax(wrappedType: type)
+      } else if optionalMark?.tokenKind == .exclamationMark {
+        return ImplicitlyUnwrappedOptionalTypeSyntax(wrappedType: type)
+      } else {
+        return type
+      }
+    }()
+
+    return FunctionDeclSyntax(
+      attributes: attributes.filter(.identifier("BypassAccess")),
+      modifiers: {
+        var modifiers = modifiers.filter(.keyword(.private))
+        modifiers.append(DeclModifierSyntax(name: .keyword(.static)))
+        return modifiers
+      }(),
+      name: .identifier("___init"),
+      genericParameterClause: genericParameterClause,
+      signature: FunctionSignatureSyntax(
+        parameterClause: signature.parameterClause,
+        effectSpecifiers: signature.effectSpecifiers,
+        returnClause: ReturnClauseSyntax(type: returnType)
+      ),
+      genericWhereClause: genericWhereClause,
+      body: CodeBlockSyntax(
+        statements: CodeBlockItemListSyntax {
+          CodeBlockItemSyntax(
+            item: .expr(
+              ExprSyntax(
+                fromProtocol: {
+                  var expr: any ExprSyntaxProtocol = FunctionCallExprSyntax(
+                    calledExpression: MemberAccessExprSyntax(
+                      base: DeclReferenceExprSyntax(
+                        baseName: .keyword(.Self)
+                      ),
+                      declName: DeclReferenceExprSyntax(
+                        baseName: .keyword(.`init`)
+                      )
+                    ),
+                    leftParen: .leftParenToken(),
+                    arguments: LabeledExprListSyntax {
+                      signature.parameterClause.parameters.map {
+                        var expression: any ExprSyntaxProtocol = DeclReferenceExprSyntax(
+                          baseName: $0.secondName ?? $0.firstName
+                        )
+                        if $0.type.as(AttributedTypeSyntax.self)?.specifiers.isInout ?? false {
+                          expression = InOutExprSyntax(expression: expression)
+                        }
+                        return LabeledExprListSyntax.Element(
+                          label: $0.firstName.trimmed,
+                          colon: .colonToken(trailingTrivia: .space),
+                          expression: expression
+                        )
+                      }
+                    },
+                    rightParen: .rightParenToken()
+                  )
+                  if signature.effectSpecifiers?.asyncSpecifier != nil {
+                    expr = AwaitExprSyntax(expression: expr)
+                  }
+                  if signature.effectSpecifiers?.throwsClause != nil {
+                    expr = TryExprSyntax(expression: expr)
+                  }
+                  return expr
+                }()
+              )
+            )
+          )
+        }
+      )
+    )
+    .trimmed
   }
 }

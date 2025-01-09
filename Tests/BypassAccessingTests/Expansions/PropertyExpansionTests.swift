@@ -23,7 +23,8 @@ final class PropertyExpansionTests: XCTestCase {
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -49,7 +50,8 @@ final class PropertyExpansionTests: XCTestCase {
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -93,14 +95,15 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get   {
-                name
+            get {
+              name
             }
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -140,7 +143,8 @@ final class PropertyExpansionTests: XCTestCase {
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -161,14 +165,14 @@ final class PropertyExpansionTests: XCTestCase {
           private static let name: String = "yutailang0119"
 
           #if DEBUG
-          static
-          var ___name: String {
+          static var ___name: String {
             name
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -183,8 +187,7 @@ final class PropertyExpansionTests: XCTestCase {
           private static var name: String = "yutailang0119"
 
           #if DEBUG
-          static
-          var ___name: String {
+          static var ___name: String {
             get {
               name
             }
@@ -195,7 +198,8 @@ final class PropertyExpansionTests: XCTestCase {
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -224,16 +228,16 @@ final class PropertyExpansionTests: XCTestCase {
           }
 
           #if DEBUG
-          @MainActor
-          var ___name: String {
-            get   {
-                name
+          @MainActor var ___name: String {
+            get {
+              name
             }
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -263,14 +267,15 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get  throws {
-              try  name
+            get throws {
+              try name
             }
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -294,14 +299,15 @@ final class PropertyExpansionTests: XCTestCase {
 
           #if DEBUG
           var ___name: String {
-            get async  {
-               await name
+            get async {
+              await name
             }
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -332,7 +338,8 @@ final class PropertyExpansionTests: XCTestCase {
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")

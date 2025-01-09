@@ -18,14 +18,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() {
-              greet(
-
-            )
+            greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -45,15 +44,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet(first f: String, _ second: @escaping () -> String) {
-              greet(
-              first: f,
-              _: second
-            )
+            greet(first: f, _: second)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -73,14 +70,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet(to target: String = "World") -> String {
-              greet(
-              to: target
-            )
+            greet(to: target)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -101,16 +97,14 @@ final class FunctionExpansionTests: XCTestCase {
           private static func greet() {}
 
           #if DEBUG
-          static
-          func ___greet() {
-              greet(
-
-            )
+          static func ___greet() {
+            greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -125,16 +119,14 @@ final class FunctionExpansionTests: XCTestCase {
           private class func max() {}
 
           #if DEBUG
-          static
-          func ___max() {
-              max(
-
-            )
+          class func ___max() {
+            max()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -155,16 +147,14 @@ final class FunctionExpansionTests: XCTestCase {
           @MainActor private func greet() {}
 
           #if DEBUG
-          @MainActor
-          func ___greet() {
-              greet(
-
-            )
+          @MainActor func ___greet() {
+            greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -186,14 +176,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() throws {
-            try  greet(
-
-            )
+            try greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -209,14 +198,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() async {
-             await greet(
-
-            )
+            await greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -232,14 +220,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet() async throws {
-            try await greet(
-
-            )
+            try await greet()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -265,14 +252,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___nickname(_ name: inout String) {
-              nickname(
-              _: &name
-            )
+            nickname(_: &name)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
@@ -298,14 +284,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___greet<I: BinaryInteger>(times: I) -> String {
-              greet(
-              times: times
-            )
+            greet(times: times)
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
 
     assertMacroExpansion(
@@ -325,14 +310,13 @@ final class FunctionExpansionTests: XCTestCase {
 
           #if DEBUG
           func ___number() -> Element where Element == Int {
-              number(
-
-            )
+            number()
           }
           #endif
         }
         """,
-      macros: testMacros
+      macros: testMacros,
+      indentationWidth: .spaces(2)
     )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
