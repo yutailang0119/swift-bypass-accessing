@@ -71,8 +71,8 @@ private extension VariableDeclSyntax {
         }
       )
     case .keyword(.var):
-      let effectSpecifiers = accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
       var accessorDeclList = AccessorDeclListSyntax {
+        let effectSpecifiers = accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
         AccessorDeclSyntax(
           accessorSpecifier: .keyword(.get),
           effectSpecifiers: effectSpecifiers,
