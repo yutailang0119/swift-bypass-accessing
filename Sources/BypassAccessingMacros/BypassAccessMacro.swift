@@ -72,7 +72,7 @@ private extension VariableDeclSyntax {
       )
     case .keyword(.var):
       var accessorDeclList = AccessorDeclListSyntax {
-        let effectSpecifiers = accessorsMatching({ $0 == .keyword(.get) }).first?.effectSpecifiers
+        let effectSpecifiers = accessorsMatching { $0 == .keyword(.get) }.first?.effectSpecifiers
         AccessorDeclSyntax(
           accessorSpecifier: .keyword(.get),
           effectSpecifiers: effectSpecifiers,
@@ -99,11 +99,11 @@ private extension VariableDeclSyntax {
         )
       }
 
-      if !(isComputed && accessorsMatching({ $0 == .keyword(.set) }).isEmpty) {
+      if !(isComputed && accessorsMatching { $0 == .keyword(.set) }.isEmpty) {
         accessorDeclList.append(
           AccessorDeclSyntax(
             accessorSpecifier: .keyword(.set),
-            effectSpecifiers: accessorsMatching({ $0 == .keyword(.set) }).first?.effectSpecifiers,
+            effectSpecifiers: accessorsMatching { $0 == .keyword(.set) }.first?.effectSpecifiers,
             body: CodeBlockSyntax(
               statements: CodeBlockItemListSyntax {
                 CodeBlockItemSyntax(
