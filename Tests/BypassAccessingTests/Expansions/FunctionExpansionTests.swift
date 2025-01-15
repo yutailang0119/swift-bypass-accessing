@@ -83,7 +83,7 @@ final class FunctionExpansionTests: XCTestCase {
     #endif
   }
 
-  func testStatic() throws {
+  func testModifiers() throws {
     #if canImport(BypassAccessingMacros)
     assertMacroExpansion(
       """

@@ -156,7 +156,7 @@ final class PropertyExpansionTests: XCTestCase {
     #endif
   }
 
-  func testStatic() throws {
+  func testModifiers() throws {
     #if canImport(BypassAccessingMacros)
     assertMacroExpansion(
       """
