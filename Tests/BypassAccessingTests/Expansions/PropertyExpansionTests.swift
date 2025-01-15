@@ -31,15 +31,15 @@ final class PropertyExpansionTests: XCTestCase {
       """
       struct User {
         @BypassAccess
-        private(set) internal var name: String = "yutailang0119"
+        private var name: String = "yutailang0119"
       }
       """,
       expandedSource: """
         struct User {
-          private(set) internal var name: String = "yutailang0119"
+          private var name: String = "yutailang0119"
 
           #if DEBUG
-          internal var ___name: String {
+          var ___name: String {
             get {
               name
             }
