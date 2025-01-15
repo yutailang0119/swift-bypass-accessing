@@ -206,6 +206,33 @@ final class PropertyExpansionTests: XCTestCase {
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private(set) internal var name: String = "yutailang0119"
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private(set) internal var name: String = "yutailang0119"
+
+          #if DEBUG
+          internal var ___name: String {
+            get {
+              name
+            }
+            set {
+              name = newValue
+            }
+          }
+          #endif
+        }
+        """,
+      macros: testMacros,
+      indentationWidth: .spaces(2)
+    )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
