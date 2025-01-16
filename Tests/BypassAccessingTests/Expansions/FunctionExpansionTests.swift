@@ -128,6 +128,28 @@ final class FunctionExpansionTests: XCTestCase {
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private mutating func modify() {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          private mutating func modify() {}
+
+          #if DEBUG
+          mutating func ___modify() {
+            modify()
+          }
+          #endif
+        }
+        """,
+      macros: testMacros,
+      indentationWidth: .spaces(2)
+    )
     #else
     throw XCTSkip("macros are only supported when running tests for the host platform")
     #endif
