@@ -29,3 +29,40 @@ let package = Package(
   ]
 )
 ```
+
+## Usage
+
+```swift
+import BypassAccessing
+
+struct Declaration {
+  @BypassAccess
+  private let property: String = "property"
+
+  @BypassAccess
+  private func function() -> String {
+    #function
+  }
+}
+```
+
+### Tests
+
+```swift
+import Testing
+import BypassAccessing
+@testable import Example
+
+struct Tests {
+  @Test
+  func test() {
+    let declaration = Declaration()
+
+    #if DEBUG
+    #expect(declaration.___property == "property")
+
+    #expect(declaration.___function() == "function()")
+    #endif
+  }
+}
+```
