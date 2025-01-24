@@ -11,8 +11,8 @@ final class UnsupportedExpansionTests: XCTestCase {
       struct User {}
       """,
       expandedSource: """
-        struct User {}
-        """,
+      struct User {}
+      """,
       diagnostics: [
         DiagnosticSpec(
           message: "'@BypassAccess' attribute cannot be applied to this declaration",
