@@ -13,16 +13,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init() {}
+        struct User {
+          private init() {}
 
-        #if DEBUG
-        static func ___init() -> Self {
-          Self.init()
+          #if DEBUG
+          static func ___init() -> Self {
+            Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -37,18 +37,18 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init(name: String) {
-          print(name)
-        }
+        struct User {
+          private init(name: String) {
+            print(name)
+          }
 
-        #if DEBUG
-        static func ___init(name: String) -> Self {
-          Self.init(name: name)
+          #if DEBUG
+          static func ___init(name: String) -> Self {
+            Self.init(name: name)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -69,18 +69,18 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init?() {
-          nil
-        }
+        struct User {
+          private init?() {
+            nil
+          }
 
-        #if DEBUG
-        static func ___init() -> Self? {
-          Self.init()
+          #if DEBUG
+          static func ___init() -> Self? {
+            Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -95,18 +95,18 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init!() {
-          nil
-        }
+        struct User {
+          private init!() {
+            nil
+          }
 
-        #if DEBUG
-        static func ___init() -> Self! {
-          Self.init()
+          #if DEBUG
+          static func ___init() -> Self! {
+            Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -125,16 +125,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        @MainActor private init() {}
+        struct User {
+          @MainActor private init() {}
 
-        #if DEBUG
-        @MainActor static func ___init() -> Self {
-          Self.init()
+          #if DEBUG
+          @MainActor static func ___init() -> Self {
+            Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -153,16 +153,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init() throws {}
+        struct User {
+          private init() throws {}
 
-        #if DEBUG
-        static func ___init() throws -> Self {
-          try Self.init()
+          #if DEBUG
+          static func ___init() throws -> Self {
+            try Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -175,16 +175,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init() async {}
+        struct User {
+          private init() async {}
 
-        #if DEBUG
-        static func ___init() async -> Self {
-          await Self.init()
+          #if DEBUG
+          static func ___init() async -> Self {
+            await Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -197,16 +197,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init() async throws {}
+        struct User {
+          private init() async throws {}
 
-        #if DEBUG
-        static func ___init() async throws -> Self {
-          try await Self.init()
+          #if DEBUG
+          static func ___init() async throws -> Self {
+            try await Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -227,18 +227,18 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init(name: inout String) {
-          print(name)
-        }
+        struct User {
+          private init(name: inout String) {
+            print(name)
+          }
 
-        #if DEBUG
-        static func ___init(name: inout String) -> Self {
-          Self.init(name: &name)
+          #if DEBUG
+          static func ___init(name: inout String) -> Self {
+            Self.init(name: &name)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -257,16 +257,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private init<I: BinaryInteger>(times: I) {}
+        struct User {
+          private init<I: BinaryInteger>(times: I) {}
 
-        #if DEBUG
-        static func ___init<I: BinaryInteger>(times: I) -> Self {
-          Self.init(times: times)
+          #if DEBUG
+          static func ___init<I: BinaryInteger>(times: I) -> Self {
+            Self.init(times: times)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -279,16 +279,16 @@ final class InitializerExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User<Element> {
-        private init() where Element: Equatable {}
+        struct User<Element> {
+          private init() where Element: Equatable {}
 
-        #if DEBUG
-        static func ___init() -> Self where Element: Equatable {
-          Self.init()
+          #if DEBUG
+          static func ___init() -> Self where Element: Equatable {
+            Self.init()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )

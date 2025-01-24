@@ -13,16 +13,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet() {}
+        struct User {
+          private func greet() {}
 
-        #if DEBUG
-        func ___greet() {
-          greet()
+          #if DEBUG
+          func ___greet() {
+            greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -37,18 +37,18 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet(first f: String, _ second: @escaping () -> String) {
-          print("Hello \\(f) \\(second())")
-        }
+        struct User {
+          private func greet(first f: String, _ second: @escaping () -> String) {
+            print("Hello \\(f) \\(second())")
+          }
 
-        #if DEBUG
-        func ___greet(first f: String, _ second: @escaping () -> String) {
-          greet(first: f, _: second)
+          #if DEBUG
+          func ___greet(first f: String, _ second: @escaping () -> String) {
+            greet(first: f, _: second)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -63,18 +63,18 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet(to target: String = "World") -> String {
-          "Hello \\(target)"
-        }
+        struct User {
+          private func greet(to target: String = "World") -> String {
+            "Hello \\(target)"
+          }
 
-        #if DEBUG
-        func ___greet(to target: String = "World") -> String {
-          greet(to: target)
+          #if DEBUG
+          func ___greet(to target: String = "World") -> String {
+            greet(to: target)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -93,16 +93,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private static func greet() {}
+        struct User {
+          private static func greet() {}
 
-        #if DEBUG
-        static func ___greet() {
-          greet()
+          #if DEBUG
+          static func ___greet() {
+            greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -115,16 +115,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      class UserGroup {
-        private class func max() {}
+        class UserGroup {
+          private class func max() {}
 
-        #if DEBUG
-        class func ___max() {
-          max()
+          #if DEBUG
+          class func ___max() {
+            max()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -137,16 +137,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private mutating func modify() {}
+        struct User {
+          private mutating func modify() {}
 
-        #if DEBUG
-        mutating func ___modify() {
-          modify()
+          #if DEBUG
+          mutating func ___modify() {
+            modify()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -165,16 +165,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        @MainActor private func greet() {}
+        struct User {
+          @MainActor private func greet() {}
 
-        #if DEBUG
-        @MainActor func ___greet() {
-          greet()
+          #if DEBUG
+          @MainActor func ___greet() {
+            greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -193,16 +193,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet() throws {}
+        struct User {
+          private func greet() throws {}
 
-        #if DEBUG
-        func ___greet() throws {
-          try greet()
+          #if DEBUG
+          func ___greet() throws {
+            try greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -215,16 +215,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet() async {}
+        struct User {
+          private func greet() async {}
 
-        #if DEBUG
-        func ___greet() async {
-          await greet()
+          #if DEBUG
+          func ___greet() async {
+            await greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -237,16 +237,16 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet() async throws {}
+        struct User {
+          private func greet() async throws {}
 
-        #if DEBUG
-        func ___greet() async throws {
-          try await greet()
+          #if DEBUG
+          func ___greet() async throws {
+            try await greet()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -267,18 +267,18 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func nickname(_ name: inout String) {
-          name += "-san"
-        }
+        struct User {
+          private func nickname(_ name: inout String) {
+            name += "-san"
+          }
 
-        #if DEBUG
-        func ___nickname(_ name: inout String) {
-          nickname(_: &name)
+          #if DEBUG
+          func ___nickname(_ name: inout String) {
+            nickname(_: &name)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -299,18 +299,18 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private func greet<I: BinaryInteger>(times: I) -> String {
-          "He\\(Array(repeating: "ll", count: Int(times)).joined())o"
-        }
+        struct User {
+          private func greet<I: BinaryInteger>(times: I) -> String {
+            "He\\(Array(repeating: "ll", count: Int(times)).joined())o"
+          }
 
-        #if DEBUG
-        func ___greet<I: BinaryInteger>(times: I) -> String {
-          greet(times: times)
+          #if DEBUG
+          func ___greet<I: BinaryInteger>(times: I) -> String {
+            greet(times: times)
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -325,18 +325,18 @@ final class FunctionExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User<Element> {
-        private func number() -> Element where Element == Int {
-          119
-        }
+        struct User<Element> {
+          private func number() -> Element where Element == Int {
+            119
+          }
 
-        #if DEBUG
-        func ___number() -> Element where Element == Int {
-          number()
+          #if DEBUG
+          func ___number() -> Element where Element == Int {
+            number()
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )

@@ -13,43 +13,43 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private let name: String = "yutailang0119"
+        struct User {
+          private let name: String = "yutailang0119"
 
-        #if DEBUG
-        var ___name: String {
-          name
-        }
-        #endif
-      }
-      """,
-      macros: testMacros,
-      indentationWidth: .spaces(2)
-    )
-
-    assertMacroExpansion(
-      """
-      struct User {
-        @BypassAccess
-        private var name: String = "yutailang0119"
-      }
-      """,
-      expandedSource: """
-      struct User {
-        private var name: String = "yutailang0119"
-
-        #if DEBUG
-        var ___name: String {
-          get {
+          #if DEBUG
+          var ___name: String {
             name
           }
-          set {
-            name = newValue
-          }
+          #endif
         }
-        #endif
+        """,
+      macros: testMacros,
+      indentationWidth: .spaces(2)
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
+        private var name: String = "yutailang0119"
       }
       """,
+      expandedSource: """
+        struct User {
+          private var name: String = "yutailang0119"
+
+          #if DEBUG
+          var ___name: String {
+            get {
+              name
+            }
+            set {
+              name = newValue
+            }
+          }
+          #endif
+        }
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -62,10 +62,10 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private let name = "yutailang0119"
-      }
-      """,
+        struct User {
+          private let name = "yutailang0119"
+        }
+        """,
       diagnostics: [
         DiagnosticSpec(
           message: "'@BypassAccess' attribute require TypeAnnotation",
@@ -93,20 +93,20 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private var name: String {
-          "yutailang0119"
-        }
-
-        #if DEBUG
-        var ___name: String {
-          get {
-            name
+        struct User {
+          private var name: String {
+            "yutailang0119"
           }
+
+          #if DEBUG
+          var ___name: String {
+            get {
+              name
+            }
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -126,28 +126,28 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private var name: String {
-          get {
-            "yutailang0119"
+        struct User {
+          private var name: String {
+            get {
+              "yutailang0119"
+            }
+            set {
+              print(newValue)
+            }
           }
-          set {
-            print(newValue)
-          }
-        }
 
-        #if DEBUG
-        var ___name: String {
-          get {
-            name
+          #if DEBUG
+          var ___name: String {
+            get {
+              name
+            }
+            set {
+              name = newValue
+            }
           }
-          set {
-            name = newValue
-          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -166,16 +166,16 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private static let name: String = "yutailang0119"
+        struct User {
+          private static let name: String = "yutailang0119"
 
-        #if DEBUG
-        static var ___name: String {
-          name
+          #if DEBUG
+          static var ___name: String {
+            name
+          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -188,21 +188,21 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private static var name: String = "yutailang0119"
+        struct User {
+          private static var name: String = "yutailang0119"
 
-        #if DEBUG
-        static var ___name: String {
-          get {
-            name
+          #if DEBUG
+          static var ___name: String {
+            get {
+              name
+            }
+            set {
+              name = newValue
+            }
           }
-          set {
-            name = newValue
-          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -215,21 +215,21 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private(set) internal var name: String = "yutailang0119"
+        struct User {
+          private(set) internal var name: String = "yutailang0119"
 
-        #if DEBUG
-        internal var ___name: String {
-          get {
-            name
+          #if DEBUG
+          internal var ___name: String {
+            get {
+              name
+            }
+            set {
+              name = newValue
+            }
           }
-          set {
-            name = newValue
-          }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -252,22 +252,22 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        @MainActor private var name: String {
-          get {
-            "yutailang0119"
+        struct User {
+          @MainActor private var name: String {
+            get {
+              "yutailang0119"
+            }
           }
-        }
 
-        #if DEBUG
-        @MainActor var ___name: String {
-          get {
-            name
+          #if DEBUG
+          @MainActor var ___name: String {
+            get {
+              name
+            }
           }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -290,22 +290,22 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private var name: String {
-          get throws {
-            "yutailang0119"
+        struct User {
+          private var name: String {
+            get throws {
+              "yutailang0119"
+            }
           }
-        }
 
-        #if DEBUG
-        var ___name: String {
-          get throws {
-            try name
+          #if DEBUG
+          var ___name: String {
+            get throws {
+              try name
+            }
           }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -322,22 +322,22 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private var name: String {
-          get async {
-            "yutailang0119"
+        struct User {
+          private var name: String {
+            get async {
+              "yutailang0119"
+            }
           }
-        }
 
-        #if DEBUG
-        var ___name: String {
-          get async {
-            await name
+          #if DEBUG
+          var ___name: String {
+            get async {
+              await name
+            }
           }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
@@ -354,22 +354,22 @@ final class PropertyExpansionTests: XCTestCase {
       }
       """,
       expandedSource: """
-      struct User {
-        private var name: String {
-          get async throws {
-            "yutailang0119"
+        struct User {
+          private var name: String {
+            get async throws {
+              "yutailang0119"
+            }
           }
-        }
 
-        #if DEBUG
-        var ___name: String {
-          get async throws {
-            try await name
+          #if DEBUG
+          var ___name: String {
+            get async throws {
+              try await name
+            }
           }
+          #endif
         }
-        #endif
-      }
-      """,
+        """,
       macros: testMacros,
       indentationWidth: .spaces(2)
     )
