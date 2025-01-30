@@ -129,7 +129,9 @@ private extension VariableDeclSyntax {
 
     return VariableDeclSyntax(
       attributes: attributes.filter(.identifier("BypassAccess")),
-      modifiers: modifiers.filter(.keyword(.private)),
+      modifiers: modifiers.filter {
+        $0.name.tokenKind != .keyword(.private) && $0.name.tokenKind != .keyword(.fileprivate)
+      },
       bindingSpecifier: .keyword(.var),
       bindings: PatternBindingListSyntax {
         PatternBindingSyntax(
