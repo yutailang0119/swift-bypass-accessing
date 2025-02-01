@@ -129,7 +129,9 @@ private extension VariableDeclSyntax {
 
     return VariableDeclSyntax(
       attributes: attributes.filter(.identifier("BypassAccess")),
-      modifiers: modifiers.filter(.keyword(.private)),
+      modifiers: modifiers.filter {
+        $0.name.tokenKind != .keyword(.private) && $0.name.tokenKind != .keyword(.fileprivate)
+      },
       bindingSpecifier: .keyword(.var),
       bindings: PatternBindingListSyntax {
         PatternBindingSyntax(
@@ -149,7 +151,9 @@ private extension FunctionDeclSyntax {
   func decl() -> FunctionDeclSyntax {
     return FunctionDeclSyntax(
       attributes: attributes.filter(.identifier("BypassAccess")),
-      modifiers: modifiers.filter(.keyword(.private)),
+      modifiers: modifiers.filter {
+        $0.name.tokenKind != .keyword(.private) && $0.name.tokenKind != .keyword(.fileprivate)
+      },
       name: .identifier("___\(name.text)"),
       genericParameterClause: genericParameterClause,
       signature: signature,
@@ -216,7 +220,9 @@ private extension InitializerDeclSyntax {
     return FunctionDeclSyntax(
       attributes: attributes.filter(.identifier("BypassAccess")),
       modifiers: {
-        var modifiers = modifiers.filter(.keyword(.private))
+        var modifiers = modifiers.filter {
+          $0.name.tokenKind != .keyword(.private) && $0.name.tokenKind != .keyword(.fileprivate)
+        }
         modifiers.append(DeclModifierSyntax(name: .keyword(.static)))
         return modifiers
       }(),

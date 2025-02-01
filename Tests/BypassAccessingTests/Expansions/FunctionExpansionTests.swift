@@ -133,6 +133,28 @@ final class FunctionExpansionTests: XCTestCase {
       """
       struct User {
         @BypassAccess
+        fileprivate func greet() {}
+      }
+      """,
+      expandedSource: """
+        struct User {
+          fileprivate func greet() {}
+
+          #if DEBUG
+          func ___greet() {
+            greet()
+          }
+          #endif
+        }
+        """,
+      macros: testMacros,
+      indentationWidth: .spaces(2)
+    )
+
+    assertMacroExpansion(
+      """
+      struct User {
+        @BypassAccess
         private mutating func modify() {}
       }
       """,
