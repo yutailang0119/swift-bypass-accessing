@@ -1,4 +1,3 @@
-import SwiftSyntaxMacroExpansion
 import SwiftSyntaxMacros
 
 #if canImport(BypassAccessingMacros)
